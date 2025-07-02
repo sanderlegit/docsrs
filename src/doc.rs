@@ -22,18 +22,11 @@ mod tests {
         let krate = Doc::from_docs("playground-api", "latest").unwrap();
         let krate = krate.fetch().await.unwrap();
         let krate = krate.decompress().await.unwrap();
-        let krate = krate.parse().await.unwrap();
+        let mut krate = krate.parse().await.unwrap();
 
-        for (id, item) in &krate.0.ast.index {
-            if let Some(name) = &item.name {
-                if name == "Client" {
-                    println!(
-                        "{id:?}{}:{item:#?}",
-                        item.docs.clone().unwrap_or_default().len()
-                    );
-                }
-            }
-        }
+        krate.build_search_index();
+        let finds = krate.search("Clnt");
+        println!("{:#?}", &finds[..1]);
     }
 
     #[tokio::test]
@@ -41,10 +34,14 @@ mod tests {
         init_logger();
 
         let std = Doc::from_json(
-            "/home/jonas/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/share/doc/rust/json/core.json",
+            "/home/jonas/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/share/doc/rust/json/std.json",
         )
         .await
         .unwrap();
-        let _std = std.parse().await.unwrap();
+        let mut std = std.parse().await.unwrap();
+
+        std.build_search_index();
+        let hits = std.search("std::fs::File");
+        println!("{:#?}", &hits[0])
     }
 }
