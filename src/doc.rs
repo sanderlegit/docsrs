@@ -49,14 +49,29 @@ impl Doc<Compressed> {
         Ok(Self(Compressed(compressed_data)))
     }
 
+    fn is_compressed(data: &[u8]) -> bool {
+        use zstd::zstd_safe::zstd_sys::ZSTD_MAGICNUMBER;
+        debug!("{:?}", &data[..4]);
+
+        data.len() >= 4
+            && u32::from_le_bytes(data[..4].try_into().unwrap_or([0; 4])) == ZSTD_MAGICNUMBER
+    }
+
     pub async fn decompress(self) -> Result<Doc<Json>, ()> {
         let decompressed_data = tokio::task::spawn_blocking(move || {
             use std::io::Read;
 
-            let mut decoder = zstd::Decoder::new(&self.0.0[..]).unwrap();
-            let mut decompressed = Vec::new();
-            decoder.read_to_end(&mut decompressed).unwrap();
-            decompressed
+            let mut data = self.0.0;
+
+            while Self::is_compressed(&data) {
+                let mut decoder = zstd::Decoder::new(&data[..]).unwrap();
+                let mut buffer = Vec::new();
+                decoder.read_to_end(&mut buffer).unwrap();
+                data = buffer;
+                println!("decompression done");
+            }
+
+            data
         })
         .await
         .unwrap();
@@ -93,13 +108,38 @@ impl Doc<Parsed> {}
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::logging::init_logger;
 
     #[tokio::test]
-    async fn success() {
-        let krate = Doc::from_docs("tokio", "latest");
+    async fn fetch() {
+        init_logger();
+
+        let krate = Doc::from_docs("playground-api", "latest");
         let krate = krate.fetch().await.unwrap();
         let krate = krate.decompress().await.unwrap();
         let krate = krate.parse().await.unwrap();
-        println!("{:?}", krate.0.ast);
+
+        for (id, item) in &krate.0.ast.index {
+            if let Some(name) = &item.name {
+                if name == "Arg" {
+                    println!(
+                        "{id:?}{}:{item:#?}",
+                        item.docs.clone().unwrap_or_default().len()
+                    );
+                }
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn from_json() {
+        init_logger();
+
+        let std = Doc::from_json(
+            "/home/jonas/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/share/doc/rust/json/core.json",
+        )
+        .await
+        .unwrap();
+        let _std = std.parse().await.unwrap();
     }
 }
