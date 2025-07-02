@@ -1,6 +1,8 @@
 mod doc;
+mod error;
 
 pub use doc::Doc;
+pub use error::Error;
 
 // logging for tests
 #[cfg(test)]
