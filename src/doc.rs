@@ -25,8 +25,9 @@ mod tests {
         let mut krate = krate.parse().await.unwrap();
 
         krate.build_search_index();
-        let finds = krate.search("Clnt");
-        println!("{:#?}", &finds[..1]);
+        let hits = krate.search("playground_api::Client", 1);
+        println!("{hits:#?}");
+        krate.save_index().unwrap();
     }
 
     #[tokio::test]
@@ -41,7 +42,7 @@ mod tests {
         let mut std = std.parse().await.unwrap();
 
         std.build_search_index();
-        let hits = std.search("std::fs::File");
-        println!("{:#?}", &hits[0])
+        let hits = std.search("std::fs::File", 1).unwrap();
+        println!("{:#?}", hits[0])
     }
 }
