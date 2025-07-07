@@ -172,22 +172,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "docz"
-version = "0.1.0"
-dependencies = [
- "env_logger",
- "fuzzy-matcher",
- "log",
- "reqwest",
- "rustdoc-types",
- "serde",
- "serde_json",
- "thiserror",
- "url",
- "zstd",
-]
-
-[[package]]
 name = "encoding_rs"
 version = "0.8.35"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -319,6 +303,22 @@ dependencies = [
  "pin-project-lite",
  "pin-utils",
  "slab",
+]
+
+[[package]]
+name = "fuzzdoc"
+version = "0.1.0"
+dependencies = [
+ "env_logger",
+ "fuzzy-matcher",
+ "log",
+ "reqwest",
+ "rustdoc-types",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "url",
+ "zstd",
 ]
 
 [[package]]

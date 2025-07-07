@@ -1,11 +1,11 @@
 [package]
-name = "docz"
+name = "fuzzdoc"
 version = "0.1.0"
 edition = "2024"
 
 license = "MIT"
 description = "Easily retrieve docs for any crate on crates.io"
-repository = "https://github.com/kingananas20/docz"
+repository = "https://github.com/kingananas20/fuzzdoc"
 readme = "README.md"
 keywords = ["simple", "docs"]
 categories = ["api-bindings"]
