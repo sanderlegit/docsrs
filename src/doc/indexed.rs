@@ -2,7 +2,7 @@ use super::Doc;
 use crate::Error;
 use fuzzy_matcher::{FuzzyMatcher, skim::SkimMatcherV2};
 use rustdoc_types::{Crate, Id, Item};
-use std::{cmp::Reverse, io::Write};
+use std::{cmp::Reverse, io::Write, path::Path};
 
 pub struct Indexed {
     pub ast: Crate,
@@ -17,12 +17,12 @@ impl Doc<Indexed> {
         })
     }
 
-    pub fn save_index(&self) -> Result<(), Error> {
+    pub fn save_index<P: AsRef<Path>>(&self, path: P) -> Result<(), Error> {
         let mut file = std::fs::OpenOptions::new()
             .create(true)
             .write(true)
             .truncate(true)
-            .open("index")?;
+            .open(path)?;
 
         for item in self.0.search_index.as_ref().unwrap() {
             writeln!(file, "{}", item.1)?;

@@ -25,9 +25,9 @@ mod tests {
         let mut krate = krate.parse().await.unwrap();
 
         krate.build_search_index();
-        let hits = krate.search("playground_api::Client", 1);
+        let hits = krate.search("playgrnd:clnt:clnt:exe", 1);
         println!("{hits:#?}");
-        krate.save_index().unwrap();
+        krate.save_index("index").unwrap();
     }
 
     #[tokio::test]
