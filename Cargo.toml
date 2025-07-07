@@ -3,6 +3,20 @@ name = "docz"
 version = "0.1.0"
 edition = "2024"
 
+license = "MIT"
+description = "Easily retrieve docs for any crate on crates.io"
+repository = "https://github.com/kingananas20/docz"
+readme = "README.md"
+keywords = ["simple", "docs"]
+categories = ["api-bindings"]
+include = [
+    "Cargo.toml",
+    "Cargo.lock",
+    "README.md",
+    "LICENSE",
+    "src/**/*"
+]
+
 [dependencies]
 fuzzy-matcher = "0.3.7"
 log = "0.4.27"
