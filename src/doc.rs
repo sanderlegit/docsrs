@@ -15,14 +15,14 @@ mod tests {
     use super::*;
     use crate::logging::init_logger;
 
-    #[tokio::test]
-    async fn fetch() {
+    #[test]
+    fn fetch() {
         init_logger();
 
         let krate = Doc::from_docs("playground-api", "latest").unwrap();
-        let krate = krate.fetch().await.unwrap();
-        let krate = krate.decompress().await.unwrap();
-        let mut krate = krate.parse().await.unwrap();
+        let krate = krate.fetch().unwrap();
+        let krate = krate.decompress().unwrap();
+        let mut krate = krate.parse().unwrap();
 
         krate.build_search_index();
         let hits = krate.search("playgrnd:clnt:clnt:exe", 1);
@@ -30,16 +30,15 @@ mod tests {
         krate.save_index("index").unwrap();
     }
 
-    #[tokio::test]
-    async fn from_json() {
+    #[test]
+    fn from_json() {
         init_logger();
 
         let std = Doc::from_json(
             "/home/jonas/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/share/doc/rust/json/std.json",
         )
-        .await
         .unwrap();
-        let mut std = std.parse().await.unwrap();
+        let mut std = std.parse().unwrap();
 
         std.build_search_index();
         let hits = std.search("std::fs::File", 1).unwrap();

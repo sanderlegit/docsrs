@@ -1,8 +1,6 @@
 use super::{Doc, indexed::Indexed};
 use crate::Error;
-use rustdoc_types::Crate;
-use std::path::Path;
-use tokio::fs;
+use std::{fs, path::Path};
 
 pub struct RawJson(Vec<u8>);
 
@@ -11,16 +9,13 @@ impl Doc<RawJson> {
         Self(RawJson(data))
     }
 
-    pub async fn from_json<P: AsRef<Path>>(path: P) -> Result<Self, Error> {
-        let json = fs::read(path).await?;
+    pub fn from_json<P: AsRef<Path>>(path: P) -> Result<Self, Error> {
+        let json = fs::read(path)?;
         Ok(Doc(RawJson(json)))
     }
 
-    pub async fn parse(self) -> Result<Doc<Indexed>, Error> {
-        let ast = tokio::task::spawn_blocking(move || -> Result<Crate, Error> {
-            Ok(serde_json::from_slice(&self.0.0)?)
-        })
-        .await??;
+    pub fn parse(self) -> Result<Doc<Indexed>, Error> {
+        let ast = serde_json::from_slice(&self.0.0)?;
 
         Ok(<Doc<Indexed>>::new(ast))
     }
