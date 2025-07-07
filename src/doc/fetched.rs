@@ -33,7 +33,6 @@ impl Doc<Fetched> {
             let mut buffer = Vec::new();
             decoder.read_to_end(&mut buffer)?;
             data = buffer;
-            println!("decompression done");
         }
 
         Ok(Doc::<RawJson>::new(data))
