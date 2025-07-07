@@ -14,30 +14,58 @@ impl Doc<Indexed> {
 
         use rustdoc_types::ItemEnum;
 
-        if let ItemEnum::Struct(strukt) = &item.inner {
-            search_keys.extend(
-                strukt
-                    .impls
-                    .iter()
-                    .filter_map(|impl_id| {
-                        let impl_item = krate.index.get(impl_id)?;
+        match &item.inner {
+            ItemEnum::Struct(strukt) => {
+                search_keys.extend(
+                    strukt
+                        .impls
+                        .iter()
+                        .filter_map(|impl_id| {
+                            let impl_item = krate.index.get(impl_id)?;
 
-                        if let ItemEnum::Impl(impl_block) = &impl_item.inner {
-                            Some(impl_block.items.iter().filter_map(|method_id| {
-                                let method_item = krate.index.get(method_id)?;
-                                let name = method_item.name.as_deref()?;
-                                let path = format!("{base_path}::{name}");
-                                Some((*method_id, path))
-                            }))
-                        } else {
+                            if let ItemEnum::Impl(impl_block) = &impl_item.inner {
+                                Some(impl_block.items.iter().filter_map(|method_id| {
+                                    let method_item = krate.index.get(method_id)?;
+                                    let name = method_item.name.as_deref()?;
+                                    let path = format!("{base_path}::{name}");
+                                    Some((*method_id, path))
+                                }))
+                            } else {
+                                None
+                            }
+                        })
+                        .flatten(),
+                );
+            }
+
+            ItemEnum::Enum(_) => {
+                search_keys.extend(
+                    krate
+                        .index
+                        .values()
+                        .filter_map(|impl_item| {
+                            if let ItemEnum::Impl(impl_block) = &impl_item.inner {
+                                if let rustdoc_types::Type::ResolvedPath(path) = &impl_block.for_ {
+                                    if &path.id == id {
+                                        return Some(impl_block.items.iter().filter_map(
+                                            |method_id| {
+                                                let method_item = krate.index.get(method_id)?;
+                                                let name = method_item.name.as_deref()?;
+                                                let path = format!("{base_path}::{name}");
+                                                Some((*method_id, path))
+                                            },
+                                        ));
+                                    }
+                                }
+                            }
                             None
-                        }
-                    })
-                    .flatten(),
-            );
-        }
+                        })
+                        .flatten(),
+                );
+            }
 
-        println!("{search_keys:?}");
+            _ => {}
+        }
 
         Some(search_keys)
     }
@@ -50,8 +78,6 @@ impl Doc<Indexed> {
             .filter_map(|(id, item)| self.generate_searchkeys(id, item))
             .flat_map(|vec| vec.into_iter())
             .collect();
-
-        println!("{index:?}");
 
         self.0.search_index = Some(index)
     }
