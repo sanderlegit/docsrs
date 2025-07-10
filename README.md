@@ -1,13 +1,15 @@
-# docz
+# fuzzdoc
 
 [![Crates.io](https://img.shields.io/crates/v/docz.svg)](https://crates.io/crates/docz)
 [![Docs.rs](https://docs.rs/docz/badge.svg)](https://docs.rs/docz)
 ![Status](https://img.shields.io/badge/status-beta-orange)
 [![License](https://img.shields.io/crates/l/docz.svg)](https://crates.io/crates/docz)
 
-**docz** is a Rust crate for retrieving and indexing `rustdoc` JSON files, enabling fuzzy searching of Rust documentation content.
+# **PLEASE DO NOT USE RIGHT NOW!! IT NEEDS A REWORK**
 
-Whether you're building a custom documentation browser, writing a Rust LSP plugin, or just need to programmatically explore docs — `docz` gives you structured access to items and metadata in a searchable form.
+**fuzzdoc** is a Rust crate for retrieving and indexing `rustdoc` JSON files, enabling fuzzy searching of Rust documentation content.
+
+Whether you're building a custom documentation browser, writing a Rust LSP plugin, or just need to programmatically explore docs — `fuzzdoc` gives you structured access to items and metadata in a searchable form.
 
 ---
 
@@ -21,7 +23,8 @@ Whether you're building a custom documentation browser, writing a Rust LSP plugi
 
 ## Installation
 
-Add `docz` to your `Cargo.toml`:
+Add `fuzzdoc` to your `Cargo.toml`:
 
 ```toml
-docz = "0.1"
+fuzzdoc = "0.1"
+```
