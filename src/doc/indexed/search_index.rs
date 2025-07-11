@@ -1,16 +1,18 @@
-use super::Doc;
-use super::Indexed;
+use super::{Doc, Indexed, SearchKey};
 use crate::Error;
 use rustdoc_types::{Id, Item};
 use std::{io::Write, path::Path};
 
 impl Doc<Indexed> {
-    fn generate_searchkeys(&self, id: &Id, item: &Item) -> Option<Vec<(Id, String)>> {
+    fn generate_searchkeys(&self, id: &Id, item: &Item) -> Option<Vec<SearchKey>> {
         let krate = &self.0.ast;
         let mut search_keys = Vec::new();
 
         let base_path = krate.paths.get(id).map(|p| p.path.join("::"))?;
-        search_keys.push((*id, base_path.clone()));
+        search_keys.push(SearchKey {
+            id: id.0,
+            key: base_path.clone(),
+        });
 
         use rustdoc_types::ItemEnum;
 
@@ -28,7 +30,10 @@ impl Doc<Indexed> {
                                     let method_item = krate.index.get(method_id)?;
                                     let name = method_item.name.as_deref()?;
                                     let path = format!("{base_path}::{name}");
-                                    Some((*method_id, path))
+                                    Some(SearchKey {
+                                        id: method_id.0,
+                                        key: path,
+                                    })
                                 }))
                             } else {
                                 None
@@ -52,7 +57,10 @@ impl Doc<Indexed> {
                                                 let method_item = krate.index.get(method_id)?;
                                                 let name = method_item.name.as_deref()?;
                                                 let path = format!("{base_path}::{name}");
-                                                Some((*method_id, path))
+                                                Some(SearchKey {
+                                                    id: method_id.0,
+                                                    key: path,
+                                                })
                                             },
                                         ));
                                     }
@@ -90,7 +98,7 @@ impl Doc<Indexed> {
             .open(path)?;
 
         for item in self.0.search_index.as_ref().unwrap() {
-            writeln!(file, "{}", item.1)?;
+            writeln!(file, "{}", item.key)?;
         }
 
         Ok(())

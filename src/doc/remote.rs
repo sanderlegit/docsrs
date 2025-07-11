@@ -1,4 +1,4 @@
-use super::{Doc, fetched::Fetched};
+use super::{Doc, compressed::Compressed};
 use crate::Error;
 
 pub struct Remote {
@@ -16,12 +16,12 @@ impl Doc<Remote> {
         }))
     }
 
-    pub fn fetch(self) -> Result<Doc<Fetched>, Error> {
+    pub fn fetch(self) -> Result<Doc<Compressed>, Error> {
         let res = self.0.reqwest_client.get(self.0.url).send()?;
 
         let bytes = res.bytes()?;
         let bytes = bytes.to_vec();
 
-        Ok(<Doc<Fetched>>::new(bytes))
+        Ok(<Doc<Compressed>>::new(bytes))
     }
 }

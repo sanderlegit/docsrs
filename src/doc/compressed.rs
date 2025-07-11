@@ -3,16 +3,16 @@ use crate::Error;
 use log::debug;
 use std::{fs, path::Path};
 
-pub struct Fetched(Vec<u8>);
+pub struct Compressed(Vec<u8>);
 
-impl Doc<Fetched> {
+impl Doc<Compressed> {
     pub(super) fn new(data: Vec<u8>) -> Self {
-        Self(Fetched(data))
+        Self(Compressed(data))
     }
 
     pub fn from_zst<P: AsRef<Path>>(path: P) -> Result<Self, Error> {
         let compressed_data = fs::read(path)?;
-        Ok(Self(Fetched(compressed_data)))
+        Ok(Self(Compressed(compressed_data)))
     }
 
     fn is_compressed(data: &[u8]) -> bool {

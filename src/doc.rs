@@ -1,12 +1,18 @@
 #[cfg(feature = "fetch")]
 mod remote;
+#[cfg(feature = "fetch")]
+pub use remote::Remote;
 
 #[cfg(feature = "decompress")]
-mod fetched;
+mod compressed;
+#[cfg(feature = "decompress")]
+pub use compressed::Compressed;
 
 mod rawjson;
+pub use rawjson::RawJson;
 
 mod indexed;
+pub use indexed::Indexed;
 
 pub struct Doc<State>(pub State);
 

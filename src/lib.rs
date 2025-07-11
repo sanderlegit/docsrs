@@ -2,6 +2,15 @@ mod doc;
 mod error;
 
 pub use doc::Doc;
+
+pub use doc::{Indexed, RawJson};
+
+#[cfg(feature = "fetch")]
+pub use doc::Remote;
+
+#[cfg(feature = "decompress")]
+pub use doc::Compressed;
+
 pub use error::Error;
 
 // logging for tests

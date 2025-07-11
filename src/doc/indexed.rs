@@ -4,9 +4,15 @@ mod search_index;
 use super::Doc;
 use rustdoc_types::{Crate, Id, Item, ItemSummary};
 
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub(super) struct SearchKey {
+    id: u32,
+    key: String,
+}
+
 pub struct Indexed {
     pub ast: Crate,
-    search_index: Option<Vec<(Id, String)>>,
+    search_index: Option<Vec<SearchKey>>,
     matcher: fuzzy_matcher::skim::SkimMatcherV2,
 }
 

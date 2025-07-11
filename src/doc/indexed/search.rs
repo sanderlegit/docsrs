@@ -1,4 +1,4 @@
-use super::{Doc, Indexed};
+use super::{Doc, Indexed, SearchKey};
 use fuzzy_matcher::FuzzyMatcher;
 use rustdoc_types::{Id, Item};
 use std::cmp::Reverse;
@@ -11,14 +11,14 @@ impl Doc<Indexed> {
         };
 
         let matcher = &self.0.matcher;
-        let mut results: Vec<(Id, i64)> = index
+        let mut results = index
             .iter()
-            .filter_map(|(id, searchable)| {
+            .filter_map(|SearchKey { id, key }| {
                 matcher
-                    .fuzzy_match(&searchable.to_lowercase(), &query.to_lowercase())
+                    .fuzzy_match(&key.to_lowercase(), &query.to_lowercase())
                     .map(|score| (*id, score))
             })
-            .collect();
+            .collect::<Vec<(u32, i64)>>();
 
         results.sort_unstable_by_key(|&(_, score)| Reverse(score));
 
@@ -35,7 +35,7 @@ impl Doc<Indexed> {
         Some(
             matches
                 .iter()
-                .filter_map(|(id, _)| self.0.ast.index.get(id))
+                .filter_map(|(id, _)| self.0.ast.index.get(&Id(*id)))
                 .collect(),
         )
     }
