@@ -1,5 +1,5 @@
+mod index;
 mod search;
-mod search_index;
 
 use super::Doc;
 use rustdoc_types::{Crate, Id, Item, ItemSummary};
