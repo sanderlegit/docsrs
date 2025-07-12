@@ -17,6 +17,9 @@ include = [
     "src/**/*"
 ]
 
+[package.metadata.docs.rs]
+all-features = true
+
 [dependencies]
 fuzzy-matcher = "0.3"
 log = "0.4"
