@@ -17,6 +17,33 @@ pub use parsed::{Item, Parsed};
 mod indexed;
 pub use indexed::Indexed;
 
+/// A generic wrapper for documentation data in different processing states.
+///
+/// This struct uses the type-state pattern to ensure compile-time safety when
+/// transitioning between different stages of documentation processing. Each state
+/// represents a different stage in the documentation pipeline.
+///
+/// # States
+///
+/// - [`Remote`] - Documentation URL ready to be fetched
+/// - [`Compressed`] - Downloaded or opened compressed documentation data
+/// - [`RawJson`] - Decompressed JSON data in bytes
+/// - [`Parsed`] - Parsed documentation AST
+/// - [`Indexed`] - Documentation with searchable index
+///
+/// # Example
+///
+/// ```rust
+/// use docsrs::Doc;
+///
+/// let doc = Doc::from_docs("serde", "latest")?
+///     .fetch()?
+///     .decompress()?
+///     .parse()?
+///     .build_search_index();
+///
+/// let results = doc.search("Serialize", None);
+/// ```
 pub struct Doc<State>(pub State);
 
 #[cfg(test)]
