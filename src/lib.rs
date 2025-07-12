@@ -1,5 +1,7 @@
 #![warn(missing_docs)]
 
+//! docsrs
+
 mod doc;
 mod error;
 

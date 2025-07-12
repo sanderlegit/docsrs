@@ -3,6 +3,16 @@ use crate::{Indexed, doc::indexed::SearchKey};
 use rustdoc_types::{Crate, Id, Impl, Item, ItemEnum};
 
 impl Doc<Parsed> {
+    /// Builds a fuzzy searchable index from the parsed documentation
+    ///
+    /// This method processes the parsed documentation AST and creates search keys
+    /// for all items (structs, enums, functions, methods, etc.) including their
+    /// fully qualified paths. The resulting index enables fast fuzzy searching
+    /// across all documentation items.
+    ///
+    /// # Returns
+    ///
+    /// A [`Doc<Indexed>`] that supports fuzzy search operations.
     pub fn build_search_index(&self) -> Doc<Indexed> {
         let krate = &self.0.ast;
         let index: Vec<SearchKey> = krate

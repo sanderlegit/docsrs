@@ -4,6 +4,31 @@ use fuzzy_matcher::FuzzyMatcher;
 use std::cmp::Reverse;
 
 impl Doc<Indexed> {
+    /// Performs fuzzy search on the indexed documentation
+    ///
+    /// Searches through all documentation items using fuzzy matching, returning
+    /// results ranked by similarity score. The search is case-insensitive and matches
+    /// against fully qualified item paths (e.g., "std::vec::Vec::push").
+    ///
+    /// # Arguments
+    ///
+    /// - `query` - The search term to match against
+    /// - `n` - Maximum numbers of results to return (None for all matches)
+    ///
+    /// # Returns
+    ///
+    /// `Some(Vec<&Item>)` with matching items ranked by relevance, or `None` if matches found.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// // Search for up to 5 items matching "vec push"
+    /// let results = indexed_doc.search("vec push", Some(5));
+    /// let results = indexed_doc.search("vec push", 5); // this works too because `n` is `impl Into<Option<usize>>`
+    ///
+    /// // Get all matches
+    /// let results = indexed_doc.search("HashMap", None);
+    /// ```
     pub fn search(&self, query: &str, n: impl Into<Option<usize>>) -> Option<Vec<&Item>> {
         let index = &self.0.search_index;
 
