@@ -1,9 +1,8 @@
 mod search;
 
-use std::collections::HashMap;
-
 use super::Doc;
 use rustdoc_types::Item;
+use std::collections::HashMap;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub(super) struct SearchKey {

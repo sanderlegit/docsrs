@@ -1,4 +1,6 @@
+mod enums;
 mod index;
+mod structs;
 
 use super::Doc;
 use rustdoc_types::Crate;

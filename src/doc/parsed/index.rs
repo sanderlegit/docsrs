@@ -1,6 +1,6 @@
 use super::{Doc, Parsed};
 use crate::{Indexed, doc::indexed::SearchKey};
-use rustdoc_types::{Id, Item};
+use rustdoc_types::{Crate, Id, Impl, Item};
 use std::collections::HashMap;
 
 impl Doc<Parsed> {
@@ -18,64 +18,32 @@ impl Doc<Parsed> {
 
         match &item.inner {
             ItemEnum::Struct(strukt) => {
-                search_keys.extend(
-                    strukt
-                        .impls
-                        .iter()
-                        .filter_map(|impl_id| {
-                            let impl_item = krate.index.get(impl_id)?;
-
-                            if let ItemEnum::Impl(impl_block) = &impl_item.inner {
-                                Some(impl_block.items.iter().filter_map(|method_id| {
-                                    let method_item = krate.index.get(method_id)?;
-                                    let name = method_item.name.as_deref()?;
-                                    let path = format!("{base_path}::{name}");
-                                    Some(SearchKey {
-                                        id: method_id.0,
-                                        key: path,
-                                    })
-                                }))
-                            } else {
-                                None
-                            }
-                        })
-                        .flatten(),
-                );
+                search_keys.extend(Self::search_keys_structs(krate, strukt, &base_path));
             }
 
             ItemEnum::Enum(_) => {
-                search_keys.extend(
-                    krate
-                        .index
-                        .values()
-                        .filter_map(|impl_item| {
-                            if let ItemEnum::Impl(impl_block) = &impl_item.inner {
-                                if let rustdoc_types::Type::ResolvedPath(path) = &impl_block.for_ {
-                                    if &path.id == id {
-                                        return Some(impl_block.items.iter().filter_map(
-                                            |method_id| {
-                                                let method_item = krate.index.get(method_id)?;
-                                                let name = method_item.name.as_deref()?;
-                                                let path = format!("{base_path}::{name}");
-                                                Some(SearchKey {
-                                                    id: method_id.0,
-                                                    key: path,
-                                                })
-                                            },
-                                        ));
-                                    }
-                                }
-                            }
-                            None
-                        })
-                        .flatten(),
-                );
+                search_keys.extend(Self::search_keys_enums(krate, id, &base_path));
             }
 
             _ => {}
         }
 
         Some(search_keys)
+    }
+
+    pub(super) fn impl_method_keys<'a>(
+        krate: &'a Crate,
+        impl_block: &'a Impl,
+        base_path: &'a str,
+    ) -> impl Iterator<Item = SearchKey> + 'a {
+        impl_block.items.iter().filter_map(move |method_id| {
+            let method_item = krate.index.get(method_id)?;
+            let name = method_item.name.as_deref()?;
+            Some(SearchKey {
+                id: method_id.0,
+                key: format!("{base_path}::{name}"),
+            })
+        })
     }
 
     pub fn build_search_index(&self) -> Doc<Indexed> {
