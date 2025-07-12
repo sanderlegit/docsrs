@@ -1,15 +1,13 @@
-# fuzzdoc
+# docsrs
 
-[![Crates.io](https://img.shields.io/crates/v/docz.svg)](https://crates.io/crates/docz)
-[![Docs.rs](https://docs.rs/docz/badge.svg)](https://docs.rs/docz)
+[![Crates.io](https://img.shields.io/crates/v/docsrs.svg)](https://crates.io/crates/docsrs)
+[![Docs.rs](https://docs.rs/docsrs/badge.svg)](https://docs.rs/docsrs)
 ![Status](https://img.shields.io/badge/status-beta-orange)
-[![License](https://img.shields.io/crates/l/docz.svg)](https://crates.io/crates/docz)
+[![License](https://img.shields.io/crates/l/docsrs.svg)](https://crates.io/crates/docsrs)
 
-# **PLEASE DO NOT USE RIGHT NOW!! IT NEEDS A REWORK**
+**docsrs** is a Rust crate for retrieving and indexing `rustdoc` JSON files, enabling fuzzy searching of Rust documentation content.
 
-**fuzzdoc** is a Rust crate for retrieving and indexing `rustdoc` JSON files, enabling fuzzy searching of Rust documentation content.
-
-Whether you're building a custom documentation browser, writing a Rust LSP plugin, or just need to programmatically explore docs — `fuzzdoc` gives you structured access to items and metadata in a searchable form.
+Whether you're building a custom documentation browser, writing a Rust LSP plugin, or just need to programmatically explore docs — `docsrs` gives you structured access to items and metadata in a searchable form.
 
 ---
 
@@ -23,8 +21,8 @@ Whether you're building a custom documentation browser, writing a Rust LSP plugi
 
 ## Installation
 
-Add `fuzzdoc` to your `Cargo.toml`:
+Add `docsrs` to your `Cargo.toml`:
 
 ```toml
-fuzzdoc = "0.1"
+docsrs = "0.1"
 ```

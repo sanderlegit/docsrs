@@ -1,6 +1,6 @@
 [package]
-name = "fuzzdoc"
-version = "0.1.1"
+name = "docsrs"
+version = "0.1.2"
 edition = "2024"
 
 license = "MIT"
