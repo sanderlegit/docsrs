@@ -10,6 +10,12 @@ pub(crate) struct SearchKey {
     pub(crate) key: String,
 }
 
+/// Represents indexed documentation data with fuzzy search capabilities.
+///
+/// This struct holds the final processed documentation with a built search index
+/// that enables fast fuzzy matching across all documentation items. The index
+/// contains searchable keys for all items including their fully qualified paths,
+/// methods, and associated functions.
 pub struct Indexed {
     pub(crate) search_index: Vec<SearchKey>,
     items: HashMap<u32, Item>,
@@ -25,6 +31,26 @@ impl Doc<Indexed> {
         })
     }
 
+    /// Saves the search index to a file for debugging or inspection.
+    ///
+    /// Writes all search keys to a text file, with each key on a separate line
+    /// in debug format. This is useful for examining the generated search index
+    /// or debugging search functionality.
+    ///
+    /// # Arguments
+    ///
+    /// - `path` - Path where the index file should be written
+    ///
+    /// # Returns
+    ///
+    /// `Result<(), Error>` - Success or file I/O error.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// let indexed_doc = parsed_doc.build_search_index();
+    /// indexed_doc.save_index("debug_index.txt")?;
+    /// ```
     pub fn save_index<P: AsRef<Path>>(&self, path: P) -> Result<(), Error> {
         let mut file = OpenOptions::new()
             .create(true)
