@@ -1,4 +1,4 @@
-use super::{Doc, indexed::Indexed};
+use super::{Doc, parsed::Parsed};
 use crate::Error;
 use std::{fs, path::Path};
 
@@ -14,9 +14,9 @@ impl Doc<RawJson> {
         Ok(Doc(RawJson(json)))
     }
 
-    pub fn parse(self) -> Result<Doc<Indexed>, Error> {
+    pub fn parse(self) -> Result<Doc<Parsed>, Error> {
         let ast = serde_json::from_slice(&self.0.0)?;
 
-        Ok(<Doc<Indexed>>::new(ast))
+        Ok(<Doc<Parsed>>::new(ast))
     }
 }

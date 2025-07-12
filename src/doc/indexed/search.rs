@@ -1,14 +1,11 @@
 use super::{Doc, Indexed, SearchKey};
 use fuzzy_matcher::FuzzyMatcher;
-use rustdoc_types::{Id, Item};
+use rustdoc_types::Item;
 use std::cmp::Reverse;
 
 impl Doc<Indexed> {
     pub fn search(&self, query: &str, n: impl Into<Option<usize>>) -> Option<Vec<&Item>> {
-        let index = match &self.0.search_index {
-            Some(idx) => idx,
-            None => return None,
-        };
+        let index = &self.0.search_index;
 
         let matcher = &self.0.matcher;
         let mut results = index
@@ -35,7 +32,7 @@ impl Doc<Indexed> {
         Some(
             matches
                 .iter()
-                .filter_map(|(id, _)| self.0.ast.index.get(&Id(*id)))
+                .filter_map(|(id, _)| self.0.items.get(id))
                 .collect(),
         )
     }

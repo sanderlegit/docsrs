@@ -11,6 +11,8 @@ pub use compressed::Compressed;
 mod rawjson;
 pub use rawjson::RawJson;
 
+mod parsed;
+
 mod indexed;
 pub use indexed::Indexed;
 
@@ -28,12 +30,11 @@ mod tests {
         let krate = Doc::from_docs("playground-api", "latest").unwrap();
         let krate = krate.fetch().unwrap();
         let krate = krate.decompress().unwrap();
-        let mut krate = krate.parse().unwrap();
+        let krate = krate.parse().unwrap();
+        let krate = krate.build_search_index();
 
-        krate.build_search_index();
         let hits = krate.search("playgrnd:clnt:clnt:exe", 1);
         println!("{hits:#?}");
-        krate.save_index("index").unwrap();
     }
 
     #[test]
@@ -44,9 +45,8 @@ mod tests {
             "/home/jonas/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/share/doc/rust/json/std.json",
         )
         .unwrap();
-        let mut std = std.parse().unwrap();
+        let std = std.parse().unwrap().build_search_index();
 
-        std.build_search_index();
         let hits = std.search("std::fs::File", 1).unwrap();
         println!("{:#?}", hits[0])
     }

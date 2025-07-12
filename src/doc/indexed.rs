@@ -1,35 +1,28 @@
-mod index;
 mod search;
 
+use std::collections::HashMap;
+
 use super::Doc;
-use rustdoc_types::{Crate, Id, Item, ItemSummary};
+use rustdoc_types::Item;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub(super) struct SearchKey {
-    id: u32,
-    key: String,
+    pub(super) id: u32,
+    pub(super) key: String,
 }
 
 pub struct Indexed {
-    pub ast: Crate,
-    search_index: Option<Vec<SearchKey>>,
+    search_index: Vec<SearchKey>,
+    items: HashMap<u32, Item>,
     matcher: fuzzy_matcher::skim::SkimMatcherV2,
 }
 
 impl Doc<Indexed> {
-    pub(super) fn new(ast: Crate) -> Self {
+    pub(super) fn new(search_index: Vec<SearchKey>, items: HashMap<u32, Item>) -> Self {
         Self(Indexed {
-            ast,
-            search_index: None,
+            search_index,
+            items,
             matcher: fuzzy_matcher::skim::SkimMatcherV2::default(),
         })
-    }
-
-    pub fn get(&self, id: u32) -> Option<&Item> {
-        self.0.ast.index.get(&Id(id))
-    }
-
-    pub fn get_path(&self, id: u32) -> Option<&ItemSummary> {
-        self.0.ast.paths.get(&Id(id))
     }
 }

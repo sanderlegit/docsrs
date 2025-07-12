@@ -1,9 +1,9 @@
-use super::{Doc, Indexed, SearchKey};
-use crate::Error;
+use super::{Doc, Parsed};
+use crate::{Indexed, doc::indexed::SearchKey};
 use rustdoc_types::{Id, Item};
-use std::{io::Write, path::Path};
+use std::collections::HashMap;
 
-impl Doc<Indexed> {
+impl Doc<Parsed> {
     fn generate_searchkeys(&self, id: &Id, item: &Item) -> Option<Vec<SearchKey>> {
         let krate = &self.0.ast;
         let mut search_keys = Vec::new();
@@ -78,7 +78,7 @@ impl Doc<Indexed> {
         Some(search_keys)
     }
 
-    pub fn build_search_index(&mut self) {
+    pub fn build_search_index(&self) -> Doc<Indexed> {
         let krate = &self.0.ast;
         let index = krate
             .index
@@ -87,20 +87,8 @@ impl Doc<Indexed> {
             .flat_map(|vec| vec.into_iter())
             .collect();
 
-        self.0.search_index = Some(index)
-    }
+        let items = HashMap::new();
 
-    pub fn save_index<P: AsRef<Path>>(&self, path: P) -> Result<(), Error> {
-        let mut file = std::fs::OpenOptions::new()
-            .create(true)
-            .write(true)
-            .truncate(true)
-            .open(path)?;
-
-        for item in self.0.search_index.as_ref().unwrap() {
-            writeln!(file, "{}", item.key)?;
-        }
-
-        Ok(())
+        Doc::<Indexed>::new(index, items)
     }
 }
