@@ -7,7 +7,14 @@ use super::Doc;
 pub use item::Item;
 use rustdoc_types::Crate;
 
+/// Represents parsed documentation data with a structured AST.
+///
+/// This struct holds the complete rustdoc AST (Abstract Syntax Tree) after
+/// JSON deserialization. The AST contains all documentation items, their
+/// relationships, and metadata in a structured format ready for indexing
+/// and processing.
 pub struct Parsed {
+    /// The complete rustdoc AST containing all documentation items
     pub ast: Crate,
 }
 
