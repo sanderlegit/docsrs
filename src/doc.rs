@@ -27,7 +27,7 @@ mod tests {
     fn fetch() {
         init_logger();
 
-        let krate = Doc::from_docs("playground-api", "latest").unwrap();
+        let krate = Doc::from_docs("syn", "latest").unwrap();
         let krate = krate.fetch().unwrap();
         let krate = krate.decompress().unwrap();
         let krate = krate.parse().unwrap();
