@@ -3,6 +3,10 @@ use crate::Error;
 use log::debug;
 use std::{fs, path::Path};
 
+/// Represents compressed documentation data in zstd format.
+///
+/// This struct holds compressed bytes that can be decompressed to reveal
+/// the raw JSON documentation data.
 pub struct Compressed(Vec<u8>);
 
 impl Doc<Compressed> {
@@ -10,6 +14,23 @@ impl Doc<Compressed> {
         Self(Compressed(data))
     }
 
+    /// Loads compressed documentation data from a zstd file.
+    ///
+    /// Reads a compressed documentation file from disk, typically with a `.zst` extension.
+    ///
+    /// # Arguments
+    ///
+    /// - `path` - Path to the compressed documentation file
+    ///
+    /// # Returns
+    ///
+    /// `Result<Doc<Compressed>, Error>` - Compressed documentation or file I/O error.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// let compressed_doc = Doc::from_zst("docs/serde.json.zst")?;
+    /// ```
     pub fn from_zst<P: AsRef<Path>>(path: P) -> Result<Self, Error> {
         let compressed_data = fs::read(path)?;
         Ok(Self(Compressed(compressed_data)))
@@ -23,6 +44,21 @@ impl Doc<Compressed> {
             && u32::from_le_bytes(data[..4].try_into().unwrap_or([0; 4])) == ZSTD_MAGICNUMBER
     }
 
+    /// Decompresses the documentation data to raw JSON.
+    ///
+    /// Decompresses the zstd-compressed bytes to reveal the raw JSON documentation data.
+    /// Handles multiple layers of compression if present.
+    ///
+    /// # Returns
+    ///
+    /// `Result<Doc<RawJson>, Error>` - Raw JSON documentation or decompression error.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// let compressed_doc = Doc::from_zst("docs/serde.json.zst")?;
+    /// let raw_json = compressed_doc.decompress()?;
+    /// ```
     pub fn decompress(self) -> Result<Doc<RawJson>, Error> {
         use std::io::Read;
 
