@@ -1,8 +1,10 @@
 mod enums;
 mod index;
+mod item;
 mod structs;
 
 use super::Doc;
+pub use item::Item;
 use rustdoc_types::Crate;
 
 pub struct Parsed {

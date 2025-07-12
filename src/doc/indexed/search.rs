@@ -1,6 +1,6 @@
 use super::{Doc, Indexed, SearchKey};
+use crate::Item;
 use fuzzy_matcher::FuzzyMatcher;
-use rustdoc_types::Item;
 use std::cmp::Reverse;
 
 impl Doc<Indexed> {

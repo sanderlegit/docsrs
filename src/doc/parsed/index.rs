@@ -1,21 +1,20 @@
 use super::{Doc, Parsed};
 use crate::{Indexed, doc::indexed::SearchKey};
 use rustdoc_types::{Crate, Id, Impl, Item, ItemEnum};
-use std::collections::HashMap;
 
 impl Doc<Parsed> {
     pub fn build_search_index(&self) -> Doc<Indexed> {
         let krate = &self.0.ast;
-        let index = krate
+        let index: Vec<SearchKey> = krate
             .index
             .iter()
             .filter_map(|(id, item)| self.generate_searchkeys(id, item))
             .flat_map(|vec| vec.into_iter())
             .collect();
 
-        let items = HashMap::new();
+        let items = self.build_items(&index);
 
-        Doc::<Indexed>::new(index, items)
+        <Doc<Indexed>>::new(index, items)
     }
 
     fn generate_searchkeys(&self, id: &Id, item: &Item) -> Option<Vec<SearchKey>> {

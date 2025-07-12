@@ -1,18 +1,17 @@
 mod search;
 
 use super::Doc;
-use crate::Error;
-use rustdoc_types::Item;
+use crate::{Error, Item};
 use std::{collections::HashMap, fs::OpenOptions, io::Write, path::Path};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub(super) struct SearchKey {
-    pub(super) id: u32,
-    pub(super) key: String,
+pub(crate) struct SearchKey {
+    pub(crate) id: u32,
+    pub(crate) key: String,
 }
 
 pub struct Indexed {
-    search_index: Vec<SearchKey>,
+    pub(crate) search_index: Vec<SearchKey>,
     items: HashMap<u32, Item>,
     matcher: fuzzy_matcher::skim::SkimMatcherV2,
 }

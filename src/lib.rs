@@ -3,7 +3,8 @@ mod error;
 
 pub use doc::Doc;
 
-pub use doc::{Indexed, RawJson};
+pub use doc::Item;
+pub use doc::{Indexed, Parsed, RawJson};
 
 #[cfg(feature = "fetch")]
 pub use doc::Remote;
