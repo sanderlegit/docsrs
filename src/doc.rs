@@ -57,7 +57,7 @@ mod tests {
     fn fetch() {
         init_logger();
 
-        let krate = Doc::from_docs("playground-api", "latest").unwrap();
+        let krate = Doc::from_docs("docsrs", "latest").unwrap();
         let krate = krate.fetch().unwrap();
         let krate = krate.decompress().unwrap();
         let krate = krate.parse().unwrap();
@@ -65,7 +65,7 @@ mod tests {
         let krate = krate.build_search_index();
         krate.save_index("index").unwrap();
 
-        let hit = krate.search("playgrnd:clnt:clnt:exe", 1);
+        let hit = krate.search("doc:from_docs", 1);
         println!("{hit:#?}");
 
         is_non_option(ast, krate.0.search_index.clone());
