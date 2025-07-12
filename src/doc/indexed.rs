@@ -1,8 +1,9 @@
 mod search;
 
 use super::Doc;
+use crate::Error;
 use rustdoc_types::Item;
-use std::collections::HashMap;
+use std::{collections::HashMap, fs::OpenOptions, io::Write, path::Path};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub(super) struct SearchKey {
@@ -23,5 +24,20 @@ impl Doc<Indexed> {
             items,
             matcher: fuzzy_matcher::skim::SkimMatcherV2::default(),
         })
+    }
+
+    pub fn save_index<P: AsRef<Path>>(&self, path: P) -> Result<(), Error> {
+        let mut file = OpenOptions::new()
+            .create(true)
+            .truncate(true)
+            .write(true)
+            .open(path)?;
+
+        self.0
+            .search_index
+            .iter()
+            .try_for_each(|key| writeln!(file, "{key:?}"))?;
+
+        Ok(())
     }
 }

@@ -32,6 +32,7 @@ mod tests {
         let krate = krate.decompress().unwrap();
         let krate = krate.parse().unwrap();
         let krate = krate.build_search_index();
+        krate.save_index("index").unwrap();
 
         let hits = krate.search("playgrnd:clnt:clnt:exe", 1);
         println!("{hits:#?}");
