@@ -1,6 +1,6 @@
 use super::{Doc, Parsed};
 use crate::{Indexed, doc::indexed::SearchKey};
-use rustdoc_types::{Crate, Id, Impl, Item, ItemEnum};
+use rustdoc_types::{Crate, Id, Impl, ItemKind, ItemSummary};
 
 impl Doc<Parsed> {
     /// Builds a fuzzy searchable index from the parsed documentation
@@ -16,7 +16,7 @@ impl Doc<Parsed> {
     pub fn build_search_index(&self) -> Doc<Indexed> {
         let krate = &self.0.ast;
         let index: Vec<SearchKey> = krate
-            .index
+            .paths
             .iter()
             .filter_map(|(id, item)| self.generate_searchkeys(id, item))
             .flat_map(|vec| vec.into_iter())
@@ -27,23 +27,24 @@ impl Doc<Parsed> {
         <Doc<Indexed>>::new(index, items)
     }
 
-    fn generate_searchkeys(&self, id: &Id, item: &Item) -> Option<Vec<SearchKey>> {
+    fn generate_searchkeys(&self, id: &Id, item_summary: &ItemSummary) -> Option<Vec<SearchKey>> {
+        if item_summary.crate_id != 0 {
+            return None;
+        };
+
         let krate = &self.0.ast;
-        let mut search_keys = Vec::new();
 
-        let base_path = krate.paths.get(id).map(|p| p.path.join("::"))?;
-        search_keys.push(SearchKey {
+        let base_path = item_summary.path.join("::");
+        let kind = item_summary.kind;
+
+        let search_keys = vec![SearchKey {
             id: id.0,
-            key: base_path.clone(),
-        });
+            key: base_path,
+        }];
 
-        match &item.inner {
-            ItemEnum::Struct(strukt) => {
-                search_keys.extend(Self::search_keys_structs(krate, strukt, &base_path));
-            }
-            ItemEnum::Enum(_) => {
-                search_keys.extend(Self::search_keys_enums(krate, id, &base_path));
-            }
+        #[allow(clippy::single_match)]
+        match kind {
+            ItemKind::Enum => {}
             _ => {}
         }
 
