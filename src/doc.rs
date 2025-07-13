@@ -55,7 +55,7 @@ mod tests {
     fn fetch() {
         init_logger();
 
-        let krate = Doc::from_docs("docsrs", "latest").unwrap();
+        let krate = Doc::from_docs("tokio", "latest").unwrap();
         let krate = krate.fetch().unwrap();
         let krate = krate.decompress().unwrap();
         let krate = krate.parse().unwrap();
