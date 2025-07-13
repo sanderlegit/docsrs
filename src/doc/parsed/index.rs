@@ -22,7 +22,7 @@ impl Doc<Parsed> {
             .flat_map(|vec| vec.into_iter())
             .collect();
 
-        let items = self.build_items(&index);
+        let items = self.build_items(&index, krate.crate_version.clone());
 
         <Doc<Indexed>>::new(index, items)
     }

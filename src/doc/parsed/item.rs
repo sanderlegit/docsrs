@@ -1,9 +1,15 @@
 use super::{Doc, Parsed};
-use crate::doc::indexed::SearchKey;
+use crate::{Error, doc::indexed::SearchKey};
+use rustdoc_types::ItemEnum;
 use std::collections::HashMap;
+use url::Url;
 
 impl Doc<Parsed> {
-    pub(super) fn build_items(&self, index: &[SearchKey]) -> HashMap<u32, Item> {
+    pub(super) fn build_items(
+        &self,
+        index: &[SearchKey],
+        version: Option<String>,
+    ) -> HashMap<u32, Item> {
         index
             .iter()
             .map(|key| {
@@ -24,6 +30,7 @@ impl Doc<Parsed> {
                     Item {
                         id: key.id,
                         crate_id: item.crate_id,
+                        crate_version: version.clone(),
                         path,
                         visibility: item.visibility,
                         span: item.span,
@@ -52,6 +59,8 @@ pub struct Item {
     pub id: u32,
     /// Identifier of the crate this item belongs to
     pub crate_id: u32,
+    /// The crate version if given
+    pub crate_version: Option<String>,
     /// Fully qualified path components (e.g., ["std", "collections", "HashMap"])
     pub path: Vec<String>,
     /// Source code location information, if available
@@ -70,4 +79,53 @@ pub struct Item {
     pub deprecation: Option<rustdoc_types::Deprecation>,
     /// The actual item type and data (struct, enum, function, etc.)
     pub inner: rustdoc_types::ItemEnum,
+}
+
+impl Item {
+    /// Returns the url for the search site of the crate
+    pub fn search_url(&self) -> Result<Url, Error> {
+        let path = self.path.join("::");
+        Ok(Url::parse(&format!("https://docs.rs/{path}"))?)
+    }
+
+    pub(crate) fn _url(&self) -> Result<Option<Url>, Error> {
+        if self.path.is_empty() {
+            return Ok(None);
+        }
+
+        let Some(crate_name) = self.path.first() else {
+            return Ok(None);
+        };
+
+        let version = self.crate_version.as_deref().unwrap_or("latest");
+
+        let mut url = Url::parse(&format!("https://docs.rs/{crate_name}/{version}"))?;
+
+        match &self.inner {
+            ItemEnum::Function(_) => {
+                if self.path.len() >= 3 {
+                    let parent_path = &self.path[..&self.path.len() - 1];
+                    let parent_type = parent_path.last().unwrap();
+
+                    let mut path_segments = url.path_segments_mut().unwrap();
+                    for segment in parent_path {
+                        path_segments.push(segment);
+                    }
+                    path_segments.push(&format!("struct.{parent_type}.html"));
+                    drop(path_segments);
+
+                    url.set_fragment(Some(&format!("method.{}", self.name)));
+                } else {
+                    let mut path_segments = url.path_segments_mut().unwrap();
+                    for segment in &self.path {
+                        path_segments.push(segment);
+                    }
+                    path_segments.push(&format!("fn.{}.html", self.name));
+                }
+            }
+            _ => return Ok(None),
+        }
+
+        Ok(Some(url))
+    }
 }
