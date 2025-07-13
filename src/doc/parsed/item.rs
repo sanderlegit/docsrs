@@ -9,14 +9,15 @@ impl Doc<Parsed> {
             .map(|key| {
                 let path = key.key.split("::").map(|s| s.to_owned()).collect();
 
-                let item = self.0.ast.index.get(&rustdoc_types::Id(key.id)).unwrap();
+                let item = self
+                    .0
+                    .ast
+                    .index
+                    .get(&rustdoc_types::Id(key.id))
+                    .unwrap()
+                    .clone();
 
-                let links = item
-                    .links
-                    .clone()
-                    .into_iter()
-                    .map(|(k, id)| (k, (id.0)))
-                    .collect();
+                let links = item.links.into_iter().map(|(k, id)| (k, (id.0))).collect();
 
                 (
                     key.id,
@@ -24,14 +25,14 @@ impl Doc<Parsed> {
                         id: key.id,
                         crate_id: item.crate_id,
                         path,
-                        visibility: item.visibility.clone(),
-                        span: item.span.clone(),
-                        name: item.name.clone().unwrap_or_default(),
-                        docs: item.docs.clone(),
+                        visibility: item.visibility,
+                        span: item.span,
+                        name: item.name.unwrap_or_default(),
+                        docs: item.docs,
                         links,
-                        attributes: item.attrs.clone(),
-                        deprecation: item.deprecation.clone(),
-                        inner: item.inner.clone(),
+                        attributes: item.attrs,
+                        deprecation: item.deprecation,
+                        inner: item.inner,
                     },
                 )
             })
