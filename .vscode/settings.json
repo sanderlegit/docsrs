@@ -1,6 +1,5 @@
 {
     "rust-analyzer.cargo.features": [
         "fetch"
-    ],
-    "editor.maxTokenizationLineLength": 1000000
+    ]
 }

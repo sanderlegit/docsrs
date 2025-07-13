@@ -10,7 +10,6 @@ pub enum Error {
     Http(#[from] ureq::Error),
 
     /// Invalid URL format when constructin docs.rs endpoint
-    #[cfg(feature = "fetch")]
     #[error("url error: {0:?}")]
     Url(#[from] url::ParseError),
 
