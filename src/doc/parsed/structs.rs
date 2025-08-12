@@ -5,13 +5,13 @@ use std::collections::HashMap;
 
 impl Doc<Parsed> {
     pub(super) fn search_keys_structs<'a>(
-        &self,
+        &'a self,
         krate: &'a Crate,
         strukt: &'a Struct,
-        base_path: &'a str,
-        parent_map: &HashMap<&'a Id, &'a Id>,
-        path_cache: &mut HashMap<&'a Id, Vec<String>>,
-    ) -> impl Iterator<Item = SearchKey> + 'a {
+        base_path: &str,
+        parent_map: &'a HashMap<&'a Id, &'a Id>,
+        path_cache: &'a mut HashMap<&'a Id, Vec<String>>,
+    ) -> impl Iterator<Item = SearchKey> {
         strukt
             .impls
             .iter()

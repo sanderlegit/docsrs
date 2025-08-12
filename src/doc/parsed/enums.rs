@@ -5,13 +5,13 @@ use std::collections::HashMap;
 
 impl Doc<Parsed> {
     pub(super) fn search_keys_enums<'a>(
-        &self,
+        &'a self,
         krate: &'a Crate,
         enm: &'a Enum,
-        base_path: &'a str,
-        parent_map: &HashMap<&'a Id, &'a Id>,
-        path_cache: &mut HashMap<&'a Id, Vec<String>>,
-    ) -> impl Iterator<Item = SearchKey> + 'a {
+        base_path: &str,
+        parent_map: &'a HashMap<&'a Id, &'a Id>,
+        path_cache: &'a mut HashMap<&'a Id, Vec<String>>,
+    ) -> impl Iterator<Item = SearchKey> {
         let variant_keys = enm.variants.iter().filter_map(move |variant_id| {
             let variant_item = krate.index.get(variant_id)?;
             let name = variant_item.name.as_deref()?;

@@ -123,7 +123,7 @@ impl Doc<Parsed> {
         &self,
         krate: &Crate,
         impl_block: &'a Impl,
-        base_path: &'a str,
+        base_path: &str,
         parent_map: &HashMap<&'a Id, &'a Id>,
         path_cache: &mut HashMap<&'a Id, Vec<String>>,
     ) -> Vec<SearchKey> {

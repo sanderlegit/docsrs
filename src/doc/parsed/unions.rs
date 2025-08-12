@@ -5,13 +5,13 @@ use std::collections::HashMap;
 
 impl Doc<Parsed> {
     pub(super) fn search_keys_unions<'a>(
-        &self,
+        &'a self,
         krate: &'a Crate,
         union: &'a Union,
-        base_path: &'a str,
-        parent_map: &HashMap<&'a Id, &'a Id>,
-        path_cache: &mut HashMap<&'a Id, Vec<String>>,
-    ) -> impl Iterator<Item = SearchKey> + 'a {
+        base_path: &str,
+        parent_map: &'a HashMap<&'a Id, &'a Id>,
+        path_cache: &'a mut HashMap<&'a Id, Vec<String>>,
+    ) -> impl Iterator<Item = SearchKey> {
         union
             .impls
             .iter()
