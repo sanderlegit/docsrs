@@ -5,11 +5,11 @@ use std::collections::HashMap;
 use url::Url;
 
 impl Doc<Parsed> {
-    pub(super) fn build_items(
-        &self,
+    pub(super) fn build_items<'a>(
+        &'a self,
         version: Option<String>,
-        parent_map: &HashMap<&Id, &Id>,
-        path_cache: &mut HashMap<&Id, Vec<String>>,
+        parent_map: &HashMap<&'a Id, &'a Id>,
+        path_cache: &mut HashMap<&'a Id, Vec<String>>,
     ) -> HashMap<u32, Item> {
         self.0
             .ast
@@ -53,7 +53,6 @@ impl Doc<Parsed> {
         match &item.inner {
             ItemEnum::Module(_) => Some(ItemKind::Module),
             ItemEnum::ExternCrate { .. } => Some(ItemKind::ExternCrate),
-            ItemEnum::Import(_) => Some(ItemKind::Import),
             ItemEnum::Union(_) => Some(ItemKind::Union),
             ItemEnum::Struct(_) => Some(ItemKind::Struct),
             ItemEnum::StructField(_) => Some(ItemKind::StructField),
@@ -64,21 +63,19 @@ impl Doc<Parsed> {
             ItemEnum::TraitAlias(_) => Some(ItemKind::TraitAlias),
             ItemEnum::Impl(_) => Some(ItemKind::Impl),
             ItemEnum::TypeAlias(_) => Some(ItemKind::TypeAlias),
-            ItemEnum::OpaqueTy(_) => Some(ItemKind::OpaqueTy),
-            ItemEnum::Constant(_) => Some(ItemKind::Constant),
+            ItemEnum::Constant { .. } => Some(ItemKind::Constant),
             ItemEnum::Static(_) => Some(ItemKind::Static),
-            ItemEnum::ForeignType => Some(ItemKind::ForeignType),
             ItemEnum::Macro(_) => Some(ItemKind::Macro),
-            ItemEnum::ProcMacro(_) => Some(ItemKind::ProcMacro),
+            ItemEnum::ProcMacro(_) => None,
             ItemEnum::Primitive(_) => Some(ItemKind::Primitive),
             ItemEnum::AssocConst { .. } => Some(ItemKind::AssocConst),
             ItemEnum::AssocType { .. } => Some(ItemKind::AssocType),
             // For `Use`, we need to resolve it to get the kind.
             ItemEnum::Use(u) => {
-                use rustdoc_types::UseKind;
-                match u.inner {
-                    UseKind::Single(ref target_id, _) => self.get_item_kind(target_id),
-                    UseKind::Glob => None, // Can't determine a single kind for a glob import
+                if u.is_glob {
+                    None
+                } else {
+                    self.get_item_kind(&u.id)
                 }
             }
             _ => None,
