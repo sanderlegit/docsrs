@@ -30,8 +30,18 @@ fn main() -> Result<(), Error> {
         .build_search_index();
 
     if let Some(results) = doc.search(&args.query, Some(args.n)) {
-        for item in results {
-            println!("{}", item.path.join("::"));
+        if let Some((first, rest)) = results.split_first() {
+            println!("{}", first.path.join("::"));
+            if let Some(docs) = &first.docs {
+                println!("\n{}", docs);
+            }
+
+            if !rest.is_empty() {
+                println!("\n---\n");
+                for item in rest {
+                    println!("{}", item.path.join("::"));
+                }
+            }
         }
     } else {
         println!(
