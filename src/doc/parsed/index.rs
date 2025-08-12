@@ -52,7 +52,7 @@ impl Doc<Parsed> {
             }
         }
 
-        let items = self.build_items(krate.crate_version.clone(), &parent_map, &mut path_cache);
+        let items = self.build_items(krate.crate_version.clone(), &index);
 
         <Doc<Indexed>>::new(index, items)
     }
@@ -74,7 +74,7 @@ impl Doc<Parsed> {
         let kind = item_summary.kind;
 
         let mut search_keys = vec![SearchKey {
-            id: id.0,
+            id: id.0.clone(),
             key: base_path.clone(),
         }];
 
@@ -128,14 +128,14 @@ impl Doc<Parsed> {
         path_cache: &mut HashMap<&'a Id, Vec<String>>,
     ) -> Vec<SearchKey> {
         let path_to_use = if let Some(trait_path) = &impl_block.trait_ {
-            if let Some(path) = self.get_item_path_recursive(&trait_path.id, parent_map, path_cache)
-            {
-                path.join("::")
-            } else {
-                base_path.to_string()
-            }
+            self.get_item_path_recursive(&trait_path.id, parent_map, path_cache)
+                .map(|p| p.join("::"))
         } else {
-            base_path.to_string()
+            Some(base_path.to_string())
+        };
+
+        let Some(path_to_use) = path_to_use else {
+            return Vec::new();
         };
 
         impl_block
@@ -145,7 +145,7 @@ impl Doc<Parsed> {
                 let method_item = krate.index.get(method_id)?;
                 let name = method_item.name.as_deref()?;
                 Some(SearchKey {
-                    id: method_id.0,
+                    id: method_id.0.clone(),
                     key: format!("{path_to_use}::{name}"),
                 })
             })

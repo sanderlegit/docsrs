@@ -6,7 +6,7 @@ use std::{collections::HashMap, fs::OpenOptions, io::Write, path::Path};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub(crate) struct SearchKey {
-    pub(crate) id: u32,
+    pub(crate) id: String,
     pub(crate) key: String,
 }
 
@@ -18,12 +18,12 @@ pub(crate) struct SearchKey {
 /// methods, and associated functions.
 pub struct Indexed {
     pub(crate) search_index: Vec<SearchKey>,
-    items: HashMap<u32, Item>,
+    items: HashMap<String, Item>,
     matcher: fuzzy_matcher::skim::SkimMatcherV2,
 }
 
 impl Doc<Indexed> {
-    pub(super) fn new(search_index: Vec<SearchKey>, items: HashMap<u32, Item>) -> Self {
+    pub(super) fn new(search_index: Vec<SearchKey>, items: HashMap<String, Item>) -> Self {
         Self(Indexed {
             search_index,
             items,
