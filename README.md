@@ -34,7 +34,7 @@ docsrs <CRATE> <QUERY> [OPTIONS]
 - `<QUERY>`: The search query (e.g., `Serialize`, `vec push`).
 
 **Options:**
-- `-v, --version <VERSION>`: The version of the crate to search [default: `latest`].
+- `-v, --crate-version <VERSION>`: The version of the crate to search [default: `latest`].
 - `-n <N>`: The maximum number of search results to return [default: `10`].
 - `-h, --help`: Print help information.
 - `-V, --version`: Print version information.

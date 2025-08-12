@@ -12,7 +12,7 @@ struct Args {
     query: String,
 
     /// The version of the crate to search in
-    #[arg(short, long, default_value = "latest")]
+    #[arg(short, long = "crate-version", default_value = "latest")]
     version: String,
 
     /// The number of search results to return
