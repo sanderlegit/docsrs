@@ -128,4 +128,43 @@ mod tests {
         let hit = std.search("std::fs::File", 1);
         println!("{hit:#?}")
     }
+
+    #[test]
+    #[cfg(feature = "fetch")]
+    fn fetch_lancedb() {
+        init_logger();
+
+        let krate = Doc::from_docs("lancedb", "latest").unwrap();
+        let krate = krate.fetch().unwrap();
+        let krate = krate.decompress().unwrap();
+        let krate = krate.parse().unwrap();
+        let krate = krate.build_search_index();
+
+        krate.save_index("lancedb_index.txt").unwrap();
+
+        let hits = krate.search("lancedb::table::Table", 1).unwrap();
+        let item = &hits[0];
+        assert_eq!(
+            item.name,
+            "Table",
+            "unexpected item name, full item: {item:#?}"
+        );
+        assert!(item.docs.is_some(), "docs for Table should exist");
+
+        let hits = krate.search("lancedb::table::Table::create_index", 5).unwrap();
+        let item = hits
+            .iter()
+            .find(|item| item.name == "create_index")
+            .expect("item `create_index` not found in search results");
+        assert_eq!(
+            item.name,
+            "create_index",
+            "unexpected item name, full item: {item:#?}"
+        );
+        assert!(item.docs.is_some(), "docs for Table::create_index should exist");
+        assert_path_superset(
+            &item.path,
+            &["lancedb", "table", "Table", "create_index"],
+        );
+    }
 }

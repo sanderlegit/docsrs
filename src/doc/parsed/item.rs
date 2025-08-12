@@ -1,50 +1,53 @@
 use super::{Doc, Parsed};
-use crate::Error;
+use crate::{doc::indexed::SearchKey, Error};
 use rustdoc_types::{Attribute, Id, ItemEnum, ItemKind};
 use std::collections::HashMap;
 use url::Url;
 
 impl Doc<Parsed> {
-    pub(super) fn build_items<'a>(
-        &'a self,
+    pub(super) fn build_items(
+        &self,
         version: Option<String>,
-        parent_map: &HashMap<&'a Id, &'a Id>,
-        path_cache: &mut HashMap<&'a Id, Vec<String>>,
-    ) -> HashMap<u32, Item> {
-        self.0
-            .ast
-            .index
-            .iter()
-            .filter_map(|(id, item)| {
-                let (path, kind) = if let Some(item_summary) = self.0.ast.paths.get(id) {
-                    (item_summary.path.clone(), Some(item_summary.kind))
-                } else {
-                    let path = self.get_item_path_recursive(id, parent_map, path_cache)?;
-                    let kind = self.get_item_kind(id);
-                    (path, kind)
-                };
+        search_index: &[SearchKey],
+    ) -> HashMap<String, Item> {
+        let mut items = HashMap::new();
+        for sk in search_index {
+            if items.contains_key(&sk.id) {
+                continue;
+            }
 
-                let links = item.links.iter().map(|(k, id)| (k.clone(), id.0)).collect();
-                Some((
-                    id.0,
-                    Item {
-                        id: id.0,
-                        crate_id: item.crate_id,
-                        crate_version: version.clone(),
-                        path,
-                        kind,
-                        visibility: item.visibility.clone(),
-                        span: item.span.clone(),
-                        name: item.name.clone().unwrap_or_default(),
-                        docs: item.docs.clone(),
-                        links,
-                        attributes: item.attrs.clone(),
-                        deprecation: item.deprecation.clone(),
-                        inner: item.inner.clone(),
-                    },
-                ))
-            })
-            .collect()
+            if let Ok(id_u32) = sk.id.parse::<u32>() {
+                let id = Id(id_u32);
+                if let Some(item) = self.0.ast.index.get(&id) {
+                    let path: Vec<String> = sk.key.split("::").map(String::from).collect();
+                    let kind = self.get_item_kind(&id);
+                    let links = item
+                        .links
+                        .iter()
+                        .map(|(k, id)| (k.clone(), id.0.to_string()))
+                        .collect();
+                    items.insert(
+                        sk.id.clone(),
+                        Item {
+                            id: sk.id.clone(),
+                            crate_id: item.crate_id,
+                            crate_version: version.clone(),
+                            path,
+                            kind,
+                            visibility: item.visibility.clone(),
+                            span: item.span.clone(),
+                            name: item.name.clone().unwrap_or_default(),
+                            docs: item.docs.clone(),
+                            links,
+                            attributes: item.attrs.clone(),
+                            deprecation: item.deprecation.clone(),
+                            inner: item.inner.clone(),
+                        },
+                    );
+                }
+            }
+        }
+        items
     }
 
     /// Tries to determine the `ItemKind` of an item.
@@ -92,7 +95,7 @@ impl Doc<Parsed> {
 #[derive(Debug, Clone, PartialEq)]
 pub struct Item {
     /// Unique identifier for this item within the documentation
-    pub id: u32,
+    pub id: String,
     /// Identifier of the crate this item belongs to
     pub crate_id: u32,
     /// The crate version if given
@@ -110,7 +113,7 @@ pub struct Item {
     /// Documentation text content in markdown format
     pub docs: Option<String>,
     /// Links to other documentation items referenced in the docs
-    pub links: HashMap<String, u32>,
+    pub links: HashMap<String, String>,
     /// Rust attributes applied to this item (e.g., "#[derive(Debug)]")
     pub attributes: Vec<Attribute>,
     /// Deprecation information if the item is deprecated

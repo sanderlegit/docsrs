@@ -18,64 +18,6 @@
 //! - **`decompress`** - Adds support for decompressing zstd-compressed files
 //! - **`fetch`** - Enables fetching compressed documentation directly from docs.rs
 //!
-//! ## Quick Start
-//!
-//! ### Basic Usage with Local JSON
-//!
-//! ```rust,ignore
-//! # fn main() -> Result<(), docsrs::Error> {
-//! use docsrs::Doc;
-//!
-//! // Load and parse a local JSON documentation file
-//! let doc = Doc::from_json("path/to/docs.json")?
-//!     .parse()?
-//!     .build_search_index();
-//!
-//! // Search for items
-//! let results = doc.search("HashMap", Some(10));
-//! for item in results.unwrap_or_default() {
-//!     println!("{}: {}", item.name, item.path.join("::"));
-//! }
-//! # Ok(())
-//! # }
-//! ```
-//!
-//! ### Fetching from docs.rs (requires `fetch` feature)
-//!
-//! ```rust,ignore
-//! # fn main() -> Result<(), docsrs::Error> {
-//! use docsrs::Doc;
-//!
-//! // Fetch, decompress, parse, and index documentation from docs.rs
-//! let doc = Doc::from_docs("serde", "latest")?
-//!     .fetch()?
-//!     .decompress()?
-//!     .parse()?
-//!     .build_search_index();
-//!
-//! // Search for serialization-related items
-//! let results = doc.search("Serialize", Some(5));
-//! # Ok(())
-//! # }
-//! ```
-//!
-//! ### Working with Compressed Files (requires `decompress` feature)
-//!
-//! ```rust,ignore
-//! # fn main() -> Result<(), docsrs::Error> {
-//! use docsrs::Doc;
-//!
-//! // Load and decompress a local zstd file
-//! let doc = Doc::from_zst("docs/tokio.json.zst")?
-//!     .decompress()?
-//!     .parse()?
-//!     .build_search_index();
-//!
-//! let results = doc.search("tokio::spawn", None);
-//! # Ok(())
-//! # }
-//! ```
-//!
 //! ## Type-State Pipeline
 //!
 //! The crate uses a type-state pattern to ensure you process documentation in the correct order:
@@ -227,7 +169,7 @@ pub(crate) mod logging {
         INIT_LOGGER.call_once(|| {
             env_logger::builder()
                 .format_timestamp(None)
-                .filter_level(log::LevelFilter::Debug)
+                .filter_level(log::LevelFilter::Info)
                 .is_test(true)
                 .init();
         });

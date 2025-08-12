@@ -77,7 +77,7 @@ impl Doc<RawJson> {
                 if let Some(attrs) = item.get_mut("attrs").and_then(|v| v.as_array_mut()) {
                     attrs.retain(|attr_val| {
                         if serde_json::from_value::<Attribute>(attr_val.clone()).is_err() {
-                            eprintln!("docsrs: ignoring invalid attribute {}", attr_val);
+                            debug!("ignoring invalid attribute {}", attr_val);
                             false
                         } else {
                             true

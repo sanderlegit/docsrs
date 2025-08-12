@@ -19,7 +19,13 @@ include = [
 [package.metadata.docs.rs]
 all-features = true
 
+[[bin]]
+name = "docsrs"
+path = "src/main.rs"
+required-features = ["fetch"]
+
 [dependencies]
+clap = { version = "4.5", features = ["derive"] }
 fuzzy-matcher = "0.3"
 log = "0.4"
 rustdoc-types = "0.55"
