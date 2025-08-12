@@ -1,12 +1,16 @@
 use super::{Doc, Parsed};
 use crate::doc::indexed::SearchKey;
-use rustdoc_types::{Crate, Enum, ItemEnum};
+use rustdoc_types::{Crate, Enum, Id, ItemEnum};
+use std::collections::HashMap;
 
 impl Doc<Parsed> {
     pub(super) fn search_keys_enums<'a>(
+        &self,
         krate: &'a Crate,
         enm: &'a Enum,
         base_path: &'a str,
+        parent_map: &HashMap<&'a Id, &'a Id>,
+        path_cache: &mut HashMap<&'a Id, Vec<String>>,
     ) -> impl Iterator<Item = SearchKey> + 'a {
         let variant_keys = enm.variants.iter().filter_map(move |variant_id| {
             let variant_item = krate.index.get(variant_id)?;
@@ -25,7 +29,10 @@ impl Doc<Parsed> {
                 let ItemEnum::Impl(impl_block) = &impl_item.inner else {
                     return None;
                 };
-                Some(Self::impl_method_keys(krate, impl_block, base_path))
+                Some(
+                    self.impl_method_keys(krate, impl_block, base_path, parent_map, path_cache)
+                        .into_iter(),
+                )
             })
             .flatten();
 

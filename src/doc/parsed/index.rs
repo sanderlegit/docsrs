@@ -16,12 +16,6 @@ impl Doc<Parsed> {
     /// A [`Doc<Indexed>`] that supports fuzzy search operations.
     pub fn build_search_index(&self) -> Doc<Indexed> {
         let krate = &self.0.ast;
-        let mut index: Vec<SearchKey> = krate
-            .paths
-            .iter()
-            .filter_map(|(id, item)| self.generate_searchkeys(id, item))
-            .flat_map(|vec| vec.into_iter())
-            .collect();
 
         // Build a map from child ID to parent module ID to discover re-export paths
         let mut parent_map: HashMap<&Id, &Id> = HashMap::new();
@@ -35,6 +29,13 @@ impl Doc<Parsed> {
 
         // A cache for recursively found paths
         let mut path_cache: HashMap<&Id, Vec<String>> = HashMap::new();
+
+        let mut index: Vec<SearchKey> = krate
+            .paths
+            .iter()
+            .filter_map(|(id, item)| self.generate_searchkeys(id, item, &parent_map, &mut path_cache))
+            .flat_map(|vec| vec.into_iter())
+            .collect();
 
         // Add search keys for re-exports (Use items) that are not in `paths`
         for (id, item) in &krate.index {
@@ -56,7 +57,13 @@ impl Doc<Parsed> {
         <Doc<Indexed>>::new(index, items)
     }
 
-    fn generate_searchkeys(&self, id: &Id, item_summary: &ItemSummary) -> Option<Vec<SearchKey>> {
+    fn generate_searchkeys<'a>(
+        &'a self,
+        id: &'a Id,
+        item_summary: &'a ItemSummary,
+        parent_map: &HashMap<&'a Id, &'a Id>,
+        path_cache: &mut HashMap<&'a Id, Vec<String>>,
+    ) -> Option<Vec<SearchKey>> {
         if item_summary.crate_id != 0 {
             return None;
         };
@@ -75,14 +82,18 @@ impl Doc<Parsed> {
             ItemKind::Struct => {
                 if let Some(item) = krate.index.get(id) {
                     if let ItemEnum::Struct(s) = &item.inner {
-                        search_keys.extend(Self::search_keys_structs(krate, s, &base_path));
+                        search_keys.extend(self.search_keys_structs(
+                            krate, s, &base_path, parent_map, path_cache,
+                        ));
                     }
                 }
             }
             ItemKind::Enum => {
                 if let Some(item) = krate.index.get(id) {
                     if let ItemEnum::Enum(e) = &item.inner {
-                        search_keys.extend(Self::search_keys_enums(krate, e, &base_path));
+                        search_keys.extend(
+                            self.search_keys_enums(krate, e, &base_path, parent_map, path_cache),
+                        );
                     }
                 }
             }
@@ -96,7 +107,9 @@ impl Doc<Parsed> {
             ItemKind::Union => {
                 if let Some(item) = krate.index.get(id) {
                     if let ItemEnum::Union(u) = &item.inner {
-                        search_keys.extend(Self::search_keys_unions(krate, u, &base_path));
+                        search_keys.extend(self.search_keys_unions(
+                            krate, u, &base_path, parent_map, path_cache,
+                        ));
                     }
                 }
             }
@@ -107,18 +120,36 @@ impl Doc<Parsed> {
     }
 
     pub(super) fn impl_method_keys<'a>(
-        krate: &'a Crate,
+        &self,
+        krate: &Crate,
         impl_block: &'a Impl,
         base_path: &'a str,
-    ) -> impl Iterator<Item = SearchKey> + 'a {
-        impl_block.items.iter().filter_map(move |method_id| {
-            let method_item = krate.index.get(method_id)?;
-            let name = method_item.name.as_deref()?;
-            Some(SearchKey {
-                id: method_id.0,
-                key: format!("{base_path}::{name}"),
+        parent_map: &HashMap<&'a Id, &'a Id>,
+        path_cache: &mut HashMap<&'a Id, Vec<String>>,
+    ) -> Vec<SearchKey> {
+        let path_to_use = if let Some(trait_path) = &impl_block.trait_ {
+            if let Some(path) = self.get_item_path_recursive(&trait_path.id, parent_map, path_cache)
+            {
+                path.join("::")
+            } else {
+                base_path.to_string()
+            }
+        } else {
+            base_path.to_string()
+        };
+
+        impl_block
+            .items
+            .iter()
+            .filter_map(move |method_id| {
+                let method_item = krate.index.get(method_id)?;
+                let name = method_item.name.as_deref()?;
+                Some(SearchKey {
+                    id: method_id.0,
+                    key: format!("{path_to_use}::{name}"),
+                })
             })
-        })
+            .collect()
     }
 
     /// Recursively finds the path of an item by traversing up the module tree.

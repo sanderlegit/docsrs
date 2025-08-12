@@ -140,6 +140,8 @@ mod tests {
         let krate = krate.parse().unwrap();
         let krate = krate.build_search_index();
 
+        krate.save_index("lancedb_index.txt").unwrap();
+
         let hits = krate.search("lancedb::table::Table", 1).unwrap();
         let item = &hits[0];
         assert_eq!(
