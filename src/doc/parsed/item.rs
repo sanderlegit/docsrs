@@ -23,7 +23,7 @@ impl Doc<Parsed> {
                     .unwrap()
                     .clone();
 
-                let item_summary = self.0.ast.paths.get(&rustdoc_types::Id(key.id)).unwrap();
+                let kind = self.0.ast.paths.get(&rustdoc_types::Id(key.id)).map(|s| s.kind);
 
                 let links = item.links.into_iter().map(|(k, id)| (k, (id.0))).collect();
 
@@ -34,7 +34,7 @@ impl Doc<Parsed> {
                         crate_id: item.crate_id,
                         crate_version: version.clone(),
                         path,
-                        kind: item_summary.kind,
+                        kind,
                         visibility: item.visibility,
                         span: item.span,
                         name: item.name.unwrap_or_default(),
@@ -67,7 +67,7 @@ pub struct Item {
     /// Fully qualified path components (e.g., ["std", "collections", "HashMap"])
     pub path: Vec<String>,
     /// The kind of the item
-    pub kind: ItemKind,
+    pub kind: Option<ItemKind>,
     /// Source code location information, if available
     pub visibility: rustdoc_types::Visibility,
     /// Name of the item (e.g., "HashMap", "push", "main")
@@ -93,6 +93,10 @@ impl Item {
             return Ok(None);
         }
 
+        let Some(kind) = self.kind else {
+            return Ok(None);
+        };
+
         let Some(crate_name) = self.path.first() else {
             return Ok(None);
         };
@@ -101,10 +105,10 @@ impl Item {
 
         let mut url = Url::parse(&format!("https://docs.rs/{crate_name}/{version}"))?;
 
-        let (path_prefix, file_name) = match self.kind {
+        let (path_prefix, file_name) = match kind {
             ItemKind::Module => (self.path.get(1..).unwrap_or(&[]), "index.html".to_string()),
             ItemKind::Struct | ItemKind::Union | ItemKind::Enum | ItemKind::Trait => {
-                let prefix = match self.kind {
+                let prefix = match kind {
                     ItemKind::Struct => "struct",
                     ItemKind::Union => "union",
                     ItemKind::Enum => "enum",
@@ -121,7 +125,7 @@ impl Item {
             | ItemKind::Static
             | ItemKind::Macro
             | ItemKind::TypeAlias => {
-                let prefix = match self.kind {
+                let prefix = match kind {
                     ItemKind::Function => "fn",
                     ItemKind::Constant => "const",
                     ItemKind::Static => "static",
