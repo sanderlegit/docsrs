@@ -1,5 +1,6 @@
 use super::{Doc, parsed::Parsed};
 use crate::Error;
+use log::debug;
 use std::{fs, path::Path};
 
 /// Represents raw JSON documentation data in bytes.
@@ -66,6 +67,7 @@ impl Doc<RawJson> {
     /// # }
     /// ```
     pub fn parse(self) -> Result<Doc<Parsed>, Error> {
+        debug!("Parsing raw JSON data ({} bytes)", self.0 .0.len());
         let ast = serde_json::from_slice(&self.0.0)?;
 
         Ok(<Doc<Parsed>>::new(ast))
