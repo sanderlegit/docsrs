@@ -10,6 +10,7 @@ use std::{fs, path::Path};
 pub struct RawJson(Vec<u8>);
 
 impl Doc<RawJson> {
+    #[cfg(feature = "decompress")]
     pub(super) fn new(data: Vec<u8>) -> Self {
         Self(RawJson(data))
     }
