@@ -58,6 +58,79 @@ docsrs serde Serialize -v 1.0.193
 
 ---
 
+## Library Usage
+
+This crate can also be used as a library to programmatically fetch, parse, and search rustdoc JSON.
+
+### Installation
+
+Add `docsrs` to your `Cargo.toml`:
+
+```toml
+[dependencies]
+docsrs = "0.1.6"
+```
+
+### Quick Start
+
+#### Basic Usage with Local JSON
+
+```rust,ignore
+# fn main() -> Result<(), docsrs::Error> {
+use docsrs::Doc;
+
+// Load and parse a local JSON documentation file
+let doc = Doc::from_json("path/to/docs.json")?
+    .parse()?
+    .build_search_index();
+
+// Search for items
+let results = doc.search("HashMap", Some(10));
+for item in results.unwrap_or_default() {
+    println!("{}: {}", item.name, item.path.join("::"));
+}
+# Ok(())
+# }
+```
+
+#### Fetching from docs.rs (requires `fetch` feature)
+
+```rust,ignore
+# fn main() -> Result<(), docsrs::Error> {
+use docsrs::Doc;
+
+// Fetch, decompress, parse, and index documentation from docs.rs
+let doc = Doc::from_docs("serde", "latest")?
+    .fetch()?
+    .decompress()?
+    .parse()?
+    .build_search_index();
+
+// Search for serialization-related items
+let results = doc.search("Serialize", Some(5));
+# Ok(())
+# }
+```
+
+#### Working with Compressed Files (requires `decompress` feature)
+
+```rust,ignore
+# fn main() -> Result<(), docsrs::Error> {
+use docsrs::Doc;
+
+// Load and decompress a local zstd file
+let doc = Doc::from_zst("docs/tokio.json.zst")?
+    .decompress()?
+    .parse()?
+    .build_search_index();
+
+let results = doc.search("tokio::spawn", None);
+# Ok(())
+# }
+```
+
+---
+
 ## Features
 
 - default -> includes loading from a json file and parsing
@@ -97,13 +170,3 @@ The following item types are indexed and searchable. Here are examples of how yo
 | Primitive       | `u8`                               |
 
 **Note:** The search is not limited to these exact formats. Thanks to fuzzy matching, you can often use shorter, more convenient queries.
-
----
-
-## Installation
-
-Add `docsrs` to your `Cargo.toml`:
-
-```toml
-docsrs = "0.1"
-```
