@@ -9,9 +9,9 @@ impl Doc<Parsed> {
         krate: &'a Crate,
         strukt: &'a Struct,
         base_path: &str,
-        parent_map: &'a HashMap<&'a Id, &'a Id>,
-        path_cache: &'a mut HashMap<&'a Id, Vec<String>>,
-    ) -> impl Iterator<Item = SearchKey> {
+        parent_map: &HashMap<&'a Id, &'a Id>,
+        path_cache: &mut HashMap<&'a Id, Vec<String>>,
+    ) -> impl Iterator<Item = SearchKey> + 'a {
         strukt
             .impls
             .iter()
