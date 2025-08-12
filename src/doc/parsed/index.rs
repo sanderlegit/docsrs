@@ -47,7 +47,10 @@ impl Doc<Parsed> {
                     self.get_item_path_recursive(id, &parent_map, &mut path_cache)
                 {
                     let key = path.join("::");
-                    index.push(SearchKey { id: id.0, key });
+                    index.push(SearchKey {
+                        id: id.0.to_string(),
+                        key,
+                    });
                 }
             }
         }
@@ -74,7 +77,7 @@ impl Doc<Parsed> {
         let kind = item_summary.kind;
 
         let mut search_keys = vec![SearchKey {
-            id: id.0.clone(),
+            id: id.0.to_string(),
             key: base_path.clone(),
         }];
 
@@ -145,7 +148,7 @@ impl Doc<Parsed> {
                 let method_item = krate.index.get(method_id)?;
                 let name = method_item.name.as_deref()?;
                 Some(SearchKey {
-                    id: method_id.0.clone(),
+                    id: method_id.0.to_string(),
                     key: format!("{path_to_use}::{name}"),
                 })
             })

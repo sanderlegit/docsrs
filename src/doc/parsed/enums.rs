@@ -16,7 +16,7 @@ impl Doc<Parsed> {
             let variant_item = krate.index.get(variant_id)?;
             let name = variant_item.name.as_deref()?;
             Some(SearchKey {
-                id: variant_id.0.clone(),
+                id: variant_id.0.to_string(),
                 key: format!("{base_path}::{name}"),
             })
         });

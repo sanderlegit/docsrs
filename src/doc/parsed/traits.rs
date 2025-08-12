@@ -15,7 +15,7 @@ impl Doc<Parsed> {
                 let item = krate.index.get(item_id)?;
                 let name = item.name.as_deref()?;
                 Some(SearchKey {
-                    id: item_id.0.clone(),
+                    id: item_id.0.to_string(),
                     key: format!("{base_path}::{name}"),
                 })
             })

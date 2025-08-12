@@ -1,5 +1,5 @@
 use super::{Doc, Parsed};
-use crate::Error;
+use crate::{doc::indexed::SearchKey, Error};
 use rustdoc_types::{Attribute, Id, ItemEnum, ItemKind};
 use std::collections::HashMap;
 use url::Url;
@@ -16,18 +16,39 @@ impl Doc<Parsed> {
                 continue;
             }
 
-            if let Some(item) = self.0.ast.index.get(&Id(sk.id.clone())) {
-                let path: Vec<String> = sk.key.split("::").map(String::from).collect();
-                let kind = self.get_item_kind(&Id(sk.id.clone()));
-                let links = item
-                    .links
-                    .iter()
-                    .map(|(k, id)| (k.clone(), id.0.clone()))
-                    .collect();
-                items.insert(
-                    sk.id.clone(),
-                    Item {
-                        id: sk.id.clone(),
+            if let Ok(id_u32) = sk.id.parse::<u32>() {
+                let id = Id(id_u32);
+                if let Some(item) = self.0.ast.index.get(&id) {
+                    let path: Vec<String> = sk.key.split("::").map(String::from).collect();
+                    let kind = self.get_item_kind(&id);
+                    let links = item
+                        .links
+                        .iter()
+                        .map(|(k, id)| (k.clone(), id.0.to_string()))
+                        .collect();
+                    items.insert(
+                        sk.id.clone(),
+                        Item {
+                            id: sk.id.clone(),
+                            crate_id: item.crate_id,
+                            crate_version: version.clone(),
+                            path,
+                            kind,
+                            visibility: item.visibility.clone(),
+                            span: item.span.clone(),
+                            name: item.name.clone().unwrap_or_default(),
+                            docs: item.docs.clone(),
+                            links,
+                            attributes: item.attrs.clone(),
+                            deprecation: item.deprecation.clone(),
+                            inner: item.inner.clone(),
+                        },
+                    );
+                }
+            }
+        }
+        items
+    }
                         crate_id: item.crate_id,
                         crate_version: version.clone(),
                         path,
