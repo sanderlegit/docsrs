@@ -1,6 +1,6 @@
 use super::{Doc, Parsed};
 use crate::{Error, doc::indexed::SearchKey};
-use rustdoc_types::{Attribute, ItemEnum, ItemKind};
+use rustdoc_types::{Attribute, ItemKind};
 use std::collections::HashMap;
 use url::Url;
 
@@ -117,18 +117,16 @@ impl Item {
                 )
             }
             ItemKind::Function
-            | ItemKind::Const
+            | ItemKind::Constant
             | ItemKind::Static
             | ItemKind::Macro
-            | ItemKind::TypeAlias
-            | ItemKind::ForeignType => {
+            | ItemKind::TypeAlias => {
                 let prefix = match self.kind {
                     ItemKind::Function => "fn",
-                    ItemKind::Const => "const",
+                    ItemKind::Constant => "const",
                     ItemKind::Static => "static",
                     ItemKind::Macro => "macro",
                     ItemKind::TypeAlias => "type",
-                    ItemKind::ForeignType => "foreigntype",
                     _ => unreachable!(),
                 };
                 (
