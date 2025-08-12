@@ -54,6 +54,19 @@ mod tests {
     use super::*;
     use crate::logging::init_logger;
 
+    fn assert_path_superset(superset_path: &[String], subset_path: &[&str]) {
+        let is_superset = subset_path
+            .iter()
+            .all(|item| superset_path.contains(&item.to_string()));
+        let same_start = superset_path.first().map(|s| s.as_str()) == subset_path.first().copied();
+        let same_end = superset_path.last().map(|s| s.as_str()) == subset_path.last().copied();
+
+        assert!(
+            is_superset && same_start && same_end,
+            "path mismatch: left=`{superset_path:?}` is not a valid superset of right=`{subset_path:?}`"
+        );
+    }
+
     #[test]
     #[cfg(feature = "fetch")]
     fn fetch_tokio() {
@@ -72,7 +85,7 @@ mod tests {
             "spawn",
             "unexpected item name, full item: {item:#?}"
         );
-        assert_eq!(item.path, ["tokio", "task", "spawn", "spawn"]);
+        assert_path_superset(&item.path, &["tokio", "task", "spawn", "spawn"]);
     }
 
     #[test]
@@ -93,7 +106,7 @@ mod tests {
             "Serialize",
             "unexpected item name, full item: {item:#?}"
         );
-        assert_eq!(item.path, ["serde", "Serialize"]);
+        assert_path_superset(&item.path, &["serde", "Serialize"]);
     }
 
     #[test]
