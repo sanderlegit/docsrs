@@ -49,13 +49,14 @@ impl Doc<Indexed> {
 
         results.sort_unstable_by(|a, b| b.0.cmp(&a.0).then(a.1.key.len().cmp(&b.1.key.len())));
 
-        if let Some(exact_match) = results
-            .iter()
-            .find(|(_, key)| key.key.to_lowercase() == lower_query)
-        {
-            if let Some(item) = self.0.items.get(&exact_match.1.id) {
-                return Some(vec![item]);
+        if let Some(item) = results.iter().find_map(|(_, search_key)| {
+            if search_key.key.to_lowercase() == lower_query {
+                self.0.items.get(&search_key.id).filter(|i| !i.name.is_empty())
+            } else {
+                None
             }
+        }) {
+            return Some(vec![item]);
         }
 
         let n = n.into();
@@ -63,15 +64,17 @@ impl Doc<Indexed> {
             return None;
         }
 
-        if let Some(n) = n {
-            results.truncate(n);
-        }
+        let items: Vec<_> = results
+            .iter()
+            .filter_map(|(_, search_key)| self.0.items.get(&search_key.id))
+            .filter(|item| !item.name.is_empty())
+            .take(n.unwrap_or(usize::MAX))
+            .collect();
 
-        Some(
-            results
-                .iter()
-                .filter_map(|(_, search_key)| self.0.items.get(&search_key.id))
-                .collect(),
-        )
+        if items.is_empty() {
+            None
+        } else {
+            Some(items)
+        }
     }
 }

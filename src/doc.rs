@@ -67,7 +67,11 @@ mod tests {
 
         let hit = krate.search("tokio::spawn", 1).unwrap();
         let item = &hit[0];
-        assert_eq!(item.name, "spawn");
+        assert_eq!(
+            item.name,
+            "spawn",
+            "unexpected item name, full item: {item:#?}"
+        );
         assert_eq!(item.path, ["tokio", "task", "spawn", "spawn"]);
     }
 
@@ -84,7 +88,11 @@ mod tests {
 
         let hits = krate.search("serde::Serialize", 1).unwrap();
         let item = &hits[0];
-        assert_eq!(item.name, "Serialize");
+        assert_eq!(
+            item.name,
+            "Serialize",
+            "unexpected item name, full item: {item:#?}"
+        );
         assert_eq!(item.path, ["serde", "Serialize"]);
     }
 
