@@ -1,6 +1,7 @@
 use super::{Doc, Parsed};
-use crate::{Indexed, doc::indexed::SearchKey};
+use crate::{doc::indexed::SearchKey, Indexed};
 use rustdoc_types::{Crate, Id, Impl, ItemEnum, ItemKind, ItemSummary};
+use std::collections::HashMap;
 
 impl Doc<Parsed> {
     /// Builds a fuzzy searchable index from the parsed documentation
@@ -15,12 +16,40 @@ impl Doc<Parsed> {
     /// A [`Doc<Indexed>`] that supports fuzzy search operations.
     pub fn build_search_index(&self) -> Doc<Indexed> {
         let krate = &self.0.ast;
-        let index: Vec<SearchKey> = krate
+        let mut index: Vec<SearchKey> = krate
             .paths
             .iter()
             .filter_map(|(id, item)| self.generate_searchkeys(id, item))
             .flat_map(|vec| vec.into_iter())
             .collect();
+
+        // Build a map from child ID to parent module ID to discover re-export paths
+        let mut parent_map: HashMap<&Id, &Id> = HashMap::new();
+        for (id, item) in &krate.index {
+            if let ItemEnum::Module(m) = &item.inner {
+                for child_id in &m.items {
+                    parent_map.insert(child_id, id);
+                }
+            }
+        }
+
+        // A cache for recursively found paths
+        let mut path_cache: HashMap<&Id, Vec<String>> = HashMap::new();
+
+        // Add search keys for re-exports (Use items) that are not in `paths`
+        for (id, item) in &krate.index {
+            if krate.paths.contains_key(id) {
+                continue;
+            }
+            if let ItemEnum::Use(_) = &item.inner {
+                if let Some(path) =
+                    self.get_item_path_recursive(id, &parent_map, &mut path_cache)
+                {
+                    let key = path.join("::");
+                    index.push(SearchKey { id: id.0, key });
+                }
+            }
+        }
 
         let items = self.build_items(krate.crate_version.clone());
 
@@ -90,5 +119,34 @@ impl Doc<Parsed> {
                 key: format!("{base_path}::{name}"),
             })
         })
+    }
+
+    /// Recursively finds the path of an item by traversing up the module tree.
+    /// This is a fallback for items not present in the `paths` map, like re-exports.
+    fn get_item_path_recursive<'a>(
+        &self,
+        id: &'a Id,
+        parent_map: &HashMap<&'a Id, &'a Id>,
+        cache: &mut HashMap<&'a Id, Vec<String>>,
+    ) -> Option<Vec<String>> {
+        if let Some(path) = cache.get(id) {
+            return Some(path.clone());
+        }
+        if let Some(summary) = self.0.ast.paths.get(id) {
+            cache.insert(id, summary.path.clone());
+            return Some(summary.path.clone());
+        }
+
+        let parent_id = parent_map.get(id)?;
+        let mut path = self.get_item_path_recursive(parent_id, parent_map, cache)?;
+
+        let item = self.0.ast.index.get(id)?;
+        let name = match &item.inner {
+            ItemEnum::Use(u) => &u.name,
+            _ => item.name.as_deref()?,
+        };
+        path.push(name.to_string());
+        cache.insert(id, path.clone());
+        Some(path)
     }
 }
