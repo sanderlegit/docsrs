@@ -151,18 +151,20 @@ mod tests {
         );
         assert!(item.docs.is_some(), "docs for Table should exist");
 
-        let hits = krate.search("lancedb::table::Table::create", 5).unwrap();
-        dbg!(&hits);
+        let hits = krate.search("lancedb::table::Table::create_index", 5).unwrap();
         let item = hits
             .iter()
-            .find(|item| item.name == "create")
-            .expect("item `create` not found in search results");
+            .find(|item| item.name == "create_index")
+            .expect("item `create_index` not found in search results");
         assert_eq!(
             item.name,
-            "create",
+            "create_index",
             "unexpected item name, full item: {item:#?}"
         );
-        assert!(item.docs.is_some(), "docs for Table::create should exist");
-        assert_path_superset(&item.path, &["lancedb", "table", "Table", "create"]);
+        assert!(item.docs.is_some(), "docs for Table::create_index should exist");
+        assert_path_superset(
+            &item.path,
+            &["lancedb", "table", "Table", "create_index"],
+        );
     }
 }
