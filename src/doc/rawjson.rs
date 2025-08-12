@@ -1,6 +1,8 @@
 use super::{Doc, parsed::Parsed};
 use crate::Error;
 use log::debug;
+use rustdoc_types::Attribute;
+use serde_json::Value;
 use std::{fs, path::Path};
 
 /// Represents raw JSON documentation data in bytes.
@@ -68,7 +70,32 @@ impl Doc<RawJson> {
     /// ```
     pub fn parse(self) -> Result<Doc<Parsed>, Error> {
         debug!("Parsing raw JSON data ({} bytes)", self.0 .0.len());
-        let ast = serde_json::from_slice(&self.0.0)?;
+        let mut value: Value = serde_json::from_slice(&self.0 .0)?;
+
+        let mut clean_attrs_in_map = |map: &mut serde_json::Map<String, Value>| {
+            for item in map.values_mut() {
+                if let Some(attrs) = item.get_mut("attrs").and_then(|v| v.as_array_mut()) {
+                    attrs.retain(|attr_val| {
+                        if serde_json::from_value::<Attribute>(attr_val.clone()).is_err() {
+                            eprintln!("docsrs: ignoring invalid attribute {}", attr_val);
+                            false
+                        } else {
+                            true
+                        }
+                    });
+                }
+            }
+        };
+
+        if let Some(index) = value.get_mut("index").and_then(|v| v.as_object_mut()) {
+            clean_attrs_in_map(index);
+        }
+
+        if let Some(paths) = value.get_mut("paths").and_then(|v| v.as_object_mut()) {
+            clean_attrs_in_map(paths);
+        }
+
+        let ast = serde_json::from_value(value)?;
 
         Ok(<Doc<Parsed>>::new(ast))
     }
