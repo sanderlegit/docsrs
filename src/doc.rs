@@ -76,10 +76,16 @@ mod tests {
     fn from_json() {
         init_logger();
 
-        let std = Doc::from_json(
-            "/home/jonas/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/share/doc/rust/json/std.json",
-        )
-        .unwrap();
+        const STD_JSON_PATH_ENV: &str = "RUSTDOC_JSON_STD_PATH";
+        let path = if let Ok(path) = std::env::var(STD_JSON_PATH_ENV) {
+            path
+        } else {
+            println!("Skipping test `from_json`: env var `{STD_JSON_PATH_ENV}` not set.");
+            println!("Example: `export {STD_JSON_PATH_ENV}=/home/user/.rustup/toolchains/nightly/share/doc/rust/json/std.json`");
+            return;
+        };
+
+        let std = Doc::from_json(path).unwrap();
         let std = std.parse().unwrap().build_search_index();
 
         let hit = std.search("std::fs::File", 1);
