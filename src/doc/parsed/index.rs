@@ -32,7 +32,7 @@ impl Doc<Parsed> {
             return None;
         };
 
-        let krate = &self.0.ast;
+        let _krate = &self.0.ast;
 
         let base_path = item_summary.path.join("::");
         let kind = item_summary.kind;

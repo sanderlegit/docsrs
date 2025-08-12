@@ -1,7 +1,3 @@
-use crate::doc::indexed::SearchKey;
-use rustdoc_types::{Crate, Id, ItemEnum};
-
-use super::{Doc, Parsed};
 
 /*impl Doc<Parsed> {
     pub(super) fn search_keys_enums<'a>(
