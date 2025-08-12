@@ -5,46 +5,32 @@ use std::collections::HashMap;
 use url::Url;
 
 impl Doc<Parsed> {
-    pub(super) fn build_items(
-        &self,
-        index: &[SearchKey],
-        version: Option<String>,
-    ) -> HashMap<u32, Item> {
-        index
+    pub(super) fn build_items(&self, version: Option<String>) -> HashMap<u32, Item> {
+        self.0
+            .ast
+            .index
             .iter()
-            .map(|key| {
-                let path = key.key.split("::").map(|s| s.to_owned()).collect();
-
-                let item = self
-                    .0
-                    .ast
-                    .index
-                    .get(&rustdoc_types::Id(key.id))
-                    .unwrap()
-                    .clone();
-
-                let kind = self.0.ast.paths.get(&rustdoc_types::Id(key.id)).map(|s| s.kind);
-
-                let links = item.links.into_iter().map(|(k, id)| (k, (id.0))).collect();
-
-                (
-                    key.id,
+            .filter_map(|(id, item)| {
+                let item_summary = self.0.ast.paths.get(id)?;
+                let links = item.links.iter().map(|(k, id)| (k.clone(), id.0)).collect();
+                Some((
+                    id.0,
                     Item {
-                        id: key.id,
+                        id: id.0,
                         crate_id: item.crate_id,
                         crate_version: version.clone(),
-                        path,
-                        kind,
-                        visibility: item.visibility,
-                        span: item.span,
-                        name: item.name.unwrap_or_default(),
-                        docs: item.docs,
+                        path: item_summary.path.clone(),
+                        kind: Some(item_summary.kind),
+                        visibility: item.visibility.clone(),
+                        span: item.span.clone(),
+                        name: item.name.clone().unwrap_or_default(),
+                        docs: item.docs.clone(),
                         links,
-                        attributes: item.attrs,
-                        deprecation: item.deprecation,
-                        inner: item.inner,
+                        attributes: item.attrs.clone(),
+                        deprecation: item.deprecation.clone(),
+                        inner: item.inner.clone(),
                     },
-                )
+                ))
             })
             .collect()
     }

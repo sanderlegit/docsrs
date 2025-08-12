@@ -43,16 +43,20 @@ impl Doc<Indexed> {
             .filter_map(|search_key| {
                 matcher
                     .fuzzy_match(&search_key.key.to_lowercase(), &lower_query)
-                    .map(|mut score| {
-                        if search_key.key.to_lowercase() == lower_query {
-                            score = i64::MAX;
-                        }
-                        (score, search_key)
-                    })
+                    .map(|score| (score, search_key))
             })
             .collect::<Vec<(i64, &SearchKey)>>();
 
         results.sort_unstable_by(|a, b| b.0.cmp(&a.0).then(a.1.key.len().cmp(&b.1.key.len())));
+
+        if let Some(exact_match) = results
+            .iter()
+            .find(|(_, key)| key.key.to_lowercase() == lower_query)
+        {
+            if let Some(item) = self.0.items.get(&exact_match.1.id) {
+                return Some(vec![item]);
+            }
+        }
 
         let n = n.into();
         if n == Some(0) || results.is_empty() {
