@@ -140,7 +140,7 @@ mod tests {
         let krate = krate.parse().unwrap();
         let krate = krate.build_search_index();
 
-        let hits = krate.search("lancedb::Table", 1).unwrap();
+        let hits = krate.search("lancedb::table::Table", 1).unwrap();
         let item = &hits[0];
         assert_eq!(
             item.name,
@@ -149,7 +149,7 @@ mod tests {
         );
         assert!(item.docs.is_some(), "docs for Table should exist");
 
-        let hits = krate.search("lancedb::Table::create", 1).unwrap();
+        let hits = krate.search("lancedb::table::Table::create", 1).unwrap();
         let item = &hits[0];
         assert_eq!(
             item.name,
