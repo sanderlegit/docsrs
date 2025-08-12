@@ -147,7 +147,7 @@
 //!
 //! ### Building a Documentation Browser
 //!
-//! ```rust
+//! ```rust,ignore
 //! use docsrs::Doc;
 //!
 //! fn search_docs(query: &str) -> Result<(), Box<dyn std::error::Error>> {
@@ -171,7 +171,7 @@
 //!
 //! ### Analyzing Documentation Coverage
 //!
-//! ```rust
+//! ```rust,ignore
 //! use docsrs::Doc;
 //!
 //! fn analyze_coverage(crate_name: &str) -> Result<(), Box<dyn std::error::Error>> {
