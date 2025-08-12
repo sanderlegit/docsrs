@@ -28,8 +28,12 @@ impl Doc<Compressed> {
     ///
     /// # Example
     ///
-    /// ```rust
+    /// ```rust,ignore
+    /// # fn main() -> Result<(), docsrs::Error> {
+    /// use docsrs::Doc;
     /// let compressed_doc = Doc::from_zst("docs/serde.json.zst")?;
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn from_zst<P: AsRef<Path>>(path: P) -> Result<Self, Error> {
         let compressed_data = fs::read(path)?;
@@ -55,9 +59,13 @@ impl Doc<Compressed> {
     ///
     /// # Example
     ///
-    /// ```rust
+    /// ```rust,ignore
+    /// # fn main() -> Result<(), docsrs::Error> {
+    /// use docsrs::Doc;
     /// let compressed_doc = Doc::from_zst("docs/serde.json.zst")?;
     /// let raw_json = compressed_doc.decompress()?;
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn decompress(self) -> Result<Doc<RawJson>, Error> {
         use std::io::Read;

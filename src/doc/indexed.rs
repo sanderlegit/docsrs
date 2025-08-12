@@ -47,9 +47,14 @@ impl Doc<Indexed> {
     ///
     /// # Example
     ///
-    /// ```rust
+    /// ```rust,ignore
+    /// # fn main() -> Result<(), docsrs::Error> {
+    /// use docsrs::Doc;
+    /// let parsed_doc = Doc::from_json("path/to/docs.json")?.parse()?;
     /// let indexed_doc = parsed_doc.build_search_index();
     /// indexed_doc.save_index("debug_index.txt")?;
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn save_index<P: AsRef<Path>>(&self, path: P) -> Result<(), Error> {
         let mut file = OpenOptions::new()

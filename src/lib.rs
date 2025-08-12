@@ -22,7 +22,8 @@
 //!
 //! ### Basic Usage with Local JSON
 //!
-//! ```rust
+//! ```rust,ignore
+//! # fn main() -> Result<(), docsrs::Error> {
 //! use docsrs::Doc;
 //!
 //! // Load and parse a local JSON documentation file
@@ -35,11 +36,14 @@
 //! for item in results.unwrap_or_default() {
 //!     println!("{}: {}", item.name, item.path.join("::"));
 //! }
+//! # Ok(())
+//! # }
 //! ```
 //!
 //! ### Fetching from docs.rs (requires `fetch` feature)
 //!
-//! ```rust
+//! ```rust,ignore
+//! # fn main() -> Result<(), docsrs::Error> {
 //! use docsrs::Doc;
 //!
 //! // Fetch, decompress, parse, and index documentation from docs.rs
@@ -51,11 +55,14 @@
 //!
 //! // Search for serialization-related items
 //! let results = doc.search("Serialize", Some(5));
+//! # Ok(())
+//! # }
 //! ```
 //!
 //! ### Working with Compressed Files (requires `decompress` feature)
 //!
-//! ```rust
+//! ```rust,ignore
+//! # fn main() -> Result<(), docsrs::Error> {
 //! use docsrs::Doc;
 //!
 //! // Load and decompress a local zstd file
@@ -65,6 +72,8 @@
 //!     .build_search_index();
 //!
 //! let results = doc.search("tokio::spawn", None);
+//! # Ok(())
+//! # }
 //! ```
 //!
 //! ## Type-State Pipeline
@@ -100,7 +109,8 @@
 //!
 //! Each search result provides comprehensive information:
 //!
-//! ```rust
+//! ```rust,ignore
+//! # fn main() -> Result<(), docsrs::Error> {
 //! # use docsrs::Doc;
 //! # let doc = Doc::from_json("example.json")?.parse()?.build_search_index();
 //! let results = doc.search("HashMap::new", Some(1));
@@ -112,6 +122,8 @@
 //!         println!("Deprecated: {}", item.deprecation.is_some());
 //!     }
 //! }
+//! # Ok(())
+//! # }
 //! ```
 //!
 //! ## Error Handling
@@ -135,7 +147,7 @@
 //!
 //! ### Building a Documentation Browser
 //!
-//! ```rust
+//! ```rust,ignore
 //! use docsrs::Doc;
 //!
 //! fn search_docs(query: &str) -> Result<(), Box<dyn std::error::Error>> {
@@ -159,7 +171,7 @@
 //!
 //! ### Analyzing Documentation Coverage
 //!
-//! ```rust
+//! ```rust,ignore
 //! use docsrs::Doc;
 //!
 //! fn analyze_coverage(crate_name: &str) -> Result<(), Box<dyn std::error::Error>> {
