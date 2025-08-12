@@ -11,7 +11,7 @@ impl Doc<Parsed> {
         base_path: &str,
         parent_map: &HashMap<&'a Id, &'a Id>,
         path_cache: &mut HashMap<&'a Id, Vec<String>>,
-    ) -> impl Iterator<Item = SearchKey> + 'a {
+    ) -> Vec<SearchKey> {
         let variant_keys = enm.variants.iter().filter_map(move |variant_id| {
             let variant_item = krate.index.get(variant_id)?;
             let name = variant_item.name.as_deref()?;
@@ -36,6 +36,6 @@ impl Doc<Parsed> {
             })
             .flatten();
 
-        variant_keys.chain(impl_keys)
+        variant_keys.chain(impl_keys).collect()
     }
 }

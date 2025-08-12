@@ -11,7 +11,7 @@ impl Doc<Parsed> {
         base_path: &str,
         parent_map: &HashMap<&'a Id, &'a Id>,
         path_cache: &mut HashMap<&'a Id, Vec<String>>,
-    ) -> impl Iterator<Item = SearchKey> + 'a {
+    ) -> Vec<SearchKey> {
         union
             .impls
             .iter()
@@ -28,5 +28,6 @@ impl Doc<Parsed> {
                 )
             })
             .flatten()
+            .collect()
     }
 }
