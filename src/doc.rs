@@ -152,6 +152,7 @@ mod tests {
         assert!(item.docs.is_some(), "docs for Table should exist");
 
         let hits = krate.search("lancedb::table::Table::create", 5).unwrap();
+        dbg!(&hits);
         let item = hits
             .iter()
             .find(|item| item.name == "create")
