@@ -1,17 +1,29 @@
 use super::{Doc, Parsed};
 use crate::Error;
-use rustdoc_types::{Attribute, ItemKind};
+use rustdoc_types::{Attribute, Id, ItemEnum, ItemKind};
 use std::collections::HashMap;
 use url::Url;
 
 impl Doc<Parsed> {
-    pub(super) fn build_items(&self, version: Option<String>) -> HashMap<u32, Item> {
+    pub(super) fn build_items(
+        &self,
+        version: Option<String>,
+        parent_map: &HashMap<&Id, &Id>,
+        path_cache: &mut HashMap<&Id, Vec<String>>,
+    ) -> HashMap<u32, Item> {
         self.0
             .ast
             .index
             .iter()
             .filter_map(|(id, item)| {
-                let item_summary = self.0.ast.paths.get(id)?;
+                let (path, kind) = if let Some(item_summary) = self.0.ast.paths.get(id) {
+                    (item_summary.path.clone(), Some(item_summary.kind))
+                } else {
+                    let path = self.get_item_path_recursive(id, parent_map, path_cache)?;
+                    let kind = self.get_item_kind(id);
+                    (path, kind)
+                };
+
                 let links = item.links.iter().map(|(k, id)| (k.clone(), id.0)).collect();
                 Some((
                     id.0,
@@ -19,8 +31,8 @@ impl Doc<Parsed> {
                         id: id.0,
                         crate_id: item.crate_id,
                         crate_version: version.clone(),
-                        path: item_summary.path.clone(),
-                        kind: Some(item_summary.kind),
+                        path,
+                        kind,
                         visibility: item.visibility.clone(),
                         span: item.span.clone(),
                         name: item.name.clone().unwrap_or_default(),
@@ -33,6 +45,44 @@ impl Doc<Parsed> {
                 ))
             })
             .collect()
+    }
+
+    /// Tries to determine the `ItemKind` of an item.
+    fn get_item_kind(&self, id: &Id) -> Option<ItemKind> {
+        let item = self.0.ast.index.get(id)?;
+        match &item.inner {
+            ItemEnum::Module(_) => Some(ItemKind::Module),
+            ItemEnum::ExternCrate { .. } => Some(ItemKind::ExternCrate),
+            ItemEnum::Import(_) => Some(ItemKind::Import),
+            ItemEnum::Union(_) => Some(ItemKind::Union),
+            ItemEnum::Struct(_) => Some(ItemKind::Struct),
+            ItemEnum::StructField(_) => Some(ItemKind::StructField),
+            ItemEnum::Enum(_) => Some(ItemKind::Enum),
+            ItemEnum::Variant(_) => Some(ItemKind::Variant),
+            ItemEnum::Function(_) => Some(ItemKind::Function),
+            ItemEnum::Trait(_) => Some(ItemKind::Trait),
+            ItemEnum::TraitAlias(_) => Some(ItemKind::TraitAlias),
+            ItemEnum::Impl(_) => Some(ItemKind::Impl),
+            ItemEnum::TypeAlias(_) => Some(ItemKind::TypeAlias),
+            ItemEnum::OpaqueTy(_) => Some(ItemKind::OpaqueTy),
+            ItemEnum::Constant(_) => Some(ItemKind::Constant),
+            ItemEnum::Static(_) => Some(ItemKind::Static),
+            ItemEnum::ForeignType => Some(ItemKind::ForeignType),
+            ItemEnum::Macro(_) => Some(ItemKind::Macro),
+            ItemEnum::ProcMacro(_) => Some(ItemKind::ProcMacro),
+            ItemEnum::Primitive(_) => Some(ItemKind::Primitive),
+            ItemEnum::AssocConst { .. } => Some(ItemKind::AssocConst),
+            ItemEnum::AssocType { .. } => Some(ItemKind::AssocType),
+            // For `Use`, we need to resolve it to get the kind.
+            ItemEnum::Use(u) => {
+                use rustdoc_types::UseKind;
+                match u.inner {
+                    UseKind::Single(ref target_id, _) => self.get_item_kind(target_id),
+                    UseKind::Glob => None, // Can't determine a single kind for a glob import
+                }
+            }
+            _ => None,
+        }
     }
 }
 
