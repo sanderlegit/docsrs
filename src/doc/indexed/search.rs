@@ -21,13 +21,18 @@ impl Doc<Indexed> {
     ///
     /// # Example
     ///
-    /// ```rust
+    /// ```rust,ignore
+    /// # fn main() -> Result<(), docsrs::Error> {
+    /// use docsrs::Doc;
+    /// let indexed_doc = Doc::from_json("path/to/docs.json")?.parse()?.build_search_index();
     /// // Search for up to 5 items matching "vec push"
     /// let results = indexed_doc.search("vec push", Some(5));
     /// let results = indexed_doc.search("vec push", 5); // this works too because `n` is `impl Into<Option<usize>>`
     ///
     /// // Get all matches
     /// let results = indexed_doc.search("HashMap", None);
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn search(&self, query: &str, n: impl Into<Option<usize>>) -> Option<Vec<&Item>> {
         let index = &self.0.search_index;

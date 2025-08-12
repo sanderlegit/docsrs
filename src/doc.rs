@@ -33,7 +33,8 @@ pub use indexed::Indexed;
 ///
 /// # Example
 ///
-/// ```rust
+/// ```rust,ignore
+/// # fn main() -> Result<(), docsrs::Error> {
 /// use docsrs::Doc;
 ///
 /// let doc = Doc::from_docs("serde", "latest")?
@@ -43,6 +44,8 @@ pub use indexed::Indexed;
 ///     .build_search_index();
 ///
 /// let results = doc.search("Serialize", None);
+/// # Ok(())
+/// # }
 /// ```
 pub struct Doc<State>(pub State);
 

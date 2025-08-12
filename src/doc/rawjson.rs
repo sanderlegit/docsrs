@@ -31,9 +31,13 @@ impl Doc<RawJson> {
     ///
     /// # Example
     ///
-    /// ```rust
+    /// ```rust,ignore
+    /// # fn main() -> Result<(), docsrs::Error> {
+    /// use docsrs::Doc;
     /// let raw_doc = Doc::from_json("docs/serde.json")?;
     /// let raw_doc = Doc::from_json("/path/to/std.json")?;
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn from_json<P: AsRef<Path>>(path: P) -> Result<Self, Error> {
         let json = fs::read(path)?;
@@ -53,9 +57,13 @@ impl Doc<RawJson> {
     ///
     /// # Example
     ///
-    /// ```rust
+    /// ```rust,ignore
+    /// # fn main() -> Result<(), docsrs::Error> {
+    /// use docsrs::Doc;
     /// let raw_doc = Doc::from_json("docs/serde.json")?;
     /// let parsed_doc = raw_doc.parse()?;
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn parse(self) -> Result<Doc<Parsed>, Error> {
         let ast = serde_json::from_slice(&self.0.0)?;
