@@ -49,24 +49,6 @@ impl Doc<Parsed> {
         }
         items
     }
-                        crate_id: item.crate_id,
-                        crate_version: version.clone(),
-                        path,
-                        kind,
-                        visibility: item.visibility.clone(),
-                        span: item.span.clone(),
-                        name: item.name.clone().unwrap_or_default(),
-                        docs: item.docs.clone(),
-                        links,
-                        attributes: item.attrs.clone(),
-                        deprecation: item.deprecation.clone(),
-                        inner: item.inner.clone(),
-                    },
-                );
-            }
-        }
-        items
-    }
 
     /// Tries to determine the `ItemKind` of an item.
     fn get_item_kind(&self, id: &Id) -> Option<ItemKind> {
