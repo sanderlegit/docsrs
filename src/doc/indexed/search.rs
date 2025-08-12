@@ -36,13 +36,19 @@ impl Doc<Indexed> {
     pub fn search(&self, query: &str, n: impl Into<Option<usize>>) -> Option<Vec<&Item>> {
         let index = &self.0.search_index;
         let matcher = &self.0.matcher;
+        let lower_query = query.to_lowercase();
 
         let mut results = index
             .iter()
             .filter_map(|search_key| {
                 matcher
-                    .fuzzy_match(&search_key.key.to_lowercase(), &query.to_lowercase())
-                    .map(|score| (score, search_key))
+                    .fuzzy_match(&search_key.key.to_lowercase(), &lower_query)
+                    .map(|mut score| {
+                        if search_key.key.to_lowercase() == lower_query {
+                            score = i64::MAX;
+                        }
+                        (score, search_key)
+                    })
             })
             .collect::<Vec<(i64, &SearchKey)>>();
 
