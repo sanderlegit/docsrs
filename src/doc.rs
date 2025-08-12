@@ -56,7 +56,7 @@ mod tests {
 
     #[test]
     #[cfg(feature = "fetch")]
-    fn fetch() {
+    fn fetch_tokio() {
         init_logger();
 
         let krate = Doc::from_docs("tokio", "latest").unwrap();
@@ -64,15 +64,28 @@ mod tests {
         let krate = krate.decompress().unwrap();
         let krate = krate.parse().unwrap();
         let krate = krate.build_search_index();
-        krate.save_index("index").unwrap();
 
-        let hit = krate.search("tokio::spawn", 1);
-        println!("{hit:#?}");
+        let hit = krate.search("tokio::spawn", 1).unwrap();
+        let item = &hit[0];
+        assert_eq!(item.name, "spawn");
+        assert_eq!(item.path, ["tokio", "spawn"]);
+    }
 
-        if let Some(item) = hit {
-            let url = item[0].url().unwrap().unwrap().to_string();
-            println!("{url}")
-        }
+    #[test]
+    #[cfg(feature = "fetch")]
+    fn fetch_serde() {
+        init_logger();
+
+        let krate = Doc::from_docs("serde", "latest").unwrap();
+        let krate = krate.fetch().unwrap();
+        let krate = krate.decompress().unwrap();
+        let krate = krate.parse().unwrap();
+        let krate = krate.build_search_index();
+
+        let hit = krate.search("serde::Serialize", 1).unwrap();
+        let item = &hit[0];
+        assert_eq!(item.name, "Serialize");
+        assert_eq!(item.path, ["serde", "ser", "Serialize"]);
     }
 
     #[test]
