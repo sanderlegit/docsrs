@@ -52,6 +52,7 @@ mod tests {
     use crate::logging::init_logger;
 
     #[test]
+    #[cfg(feature = "fetch")]
     fn fetch() {
         init_logger();
 
