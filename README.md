@@ -11,6 +11,53 @@ Whether you're building a custom documentation browser, writing a Rust LSP plugi
 
 ---
 
+## CLI
+
+This crate also provides a command-line interface for quick documentation searches from your terminal.
+
+### Installation
+
+With Rust's package manager `cargo`, you can install the `docsrs` CLI via:
+```sh
+cargo install docsrs --features fetch
+```
+*Note: at the time of writing, the crate isn't published with the binary yet. You can use `cargo install --git https://github.com/kingananas20/fuzzdoc --features fetch` for now.*
+
+### Usage
+
+```sh
+docsrs <CRATE> <QUERY> [OPTIONS]
+```
+
+**Arguments:**
+- `<CRATE>`: The name of the crate to search in (e.g., `serde`, `tokio`).
+- `<QUERY>`: The search query (e.g., `Serialize`, `vec push`).
+
+**Options:**
+- `-v, --version <VERSION>`: The version of the crate to search [default: `latest`].
+- `-n <N>`: The maximum number of search results to return [default: `10`].
+- `-h, --help`: Print help information.
+- `-V, --version`: Print version information.
+
+### Examples
+
+Search for `Serialize` in the latest version of `serde`:
+```sh
+docsrs serde Serialize
+```
+
+Search for `spawn` in `tokio` and get up to 5 results:
+```sh
+docsrs tokio spawn -n 5
+```
+
+Search in a specific version of a crate:
+```sh
+docsrs serde Serialize -v 1.0.193
+```
+
+---
+
 ## Features
 
 - default -> includes loading from a json file and parsing
