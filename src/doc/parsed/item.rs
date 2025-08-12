@@ -75,7 +75,7 @@ impl Doc<Parsed> {
                 if u.is_glob {
                     None
                 } else {
-                    self.get_item_kind(&u.id)
+                    u.id.as_ref().and_then(|id| self.get_item_kind(id))
                 }
             }
             _ => None,
