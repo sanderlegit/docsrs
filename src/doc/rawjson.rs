@@ -72,7 +72,7 @@ impl Doc<RawJson> {
         debug!("Parsing raw JSON data ({} bytes)", self.0 .0.len());
         let mut value: Value = serde_json::from_slice(&self.0 .0)?;
 
-        let mut clean_attrs_in_map = |map: &mut serde_json::Map<String, Value>| {
+        let clean_attrs_in_map = |map: &mut serde_json::Map<String, Value>| {
             for item in map.values_mut() {
                 if let Some(attrs) = item.get_mut("attrs").and_then(|v| v.as_array_mut()) {
                     attrs.retain(|attr_val| {

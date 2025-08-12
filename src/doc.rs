@@ -85,7 +85,7 @@ mod tests {
         let hit = krate.search("serde::Serialize", 1).unwrap();
         let item = &hit[0];
         assert_eq!(item.name, "Serialize");
-        assert_eq!(item.path, ["serde", "ser", "Serialize"]);
+        assert_eq!(item.path, ["serde", "Serialize"]);
     }
 
     #[test]

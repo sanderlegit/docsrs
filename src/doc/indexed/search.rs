@@ -1,7 +1,6 @@
 use super::{Doc, Indexed, SearchKey};
 use crate::Item;
 use fuzzy_matcher::FuzzyMatcher;
-use std::cmp::Reverse;
 
 impl Doc<Indexed> {
     /// Performs fuzzy search on the indexed documentation
@@ -36,33 +35,32 @@ impl Doc<Indexed> {
     /// ```
     pub fn search(&self, query: &str, n: impl Into<Option<usize>>) -> Option<Vec<&Item>> {
         let index = &self.0.search_index;
-
         let matcher = &self.0.matcher;
+
         let mut results = index
             .iter()
-            .filter_map(|SearchKey { id, key }| {
+            .filter_map(|search_key| {
                 matcher
-                    .fuzzy_match(&key.to_lowercase(), &query.to_lowercase())
-                    .map(|score| (*id, score))
+                    .fuzzy_match(&search_key.key.to_lowercase(), &query.to_lowercase())
+                    .map(|score| (score, search_key))
             })
-            .collect::<Vec<(u32, i64)>>();
+            .collect::<Vec<(i64, &SearchKey)>>();
 
-        results.sort_unstable_by_key(|&(_, score)| Reverse(score));
+        results.sort_unstable_by(|a, b| b.0.cmp(&a.0).then(a.1.key.len().cmp(&b.1.key.len())));
 
-        let mut matches = results;
         let n = n.into();
-        if n == Some(0) || matches.is_empty() {
+        if n == Some(0) || results.is_empty() {
             return None;
         }
 
         if let Some(n) = n {
-            matches.truncate(n);
+            results.truncate(n);
         }
 
         Some(
-            matches
+            results
                 .iter()
-                .filter_map(|(id, _)| self.0.items.get(id))
+                .filter_map(|(_, search_key)| self.0.items.get(&search_key.id))
                 .collect(),
         )
     }
