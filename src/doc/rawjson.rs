@@ -1,6 +1,6 @@
 use super::{Doc, parsed::Parsed};
 use crate::Error;
-use log::{debug, warn};
+use log::debug;
 use rustdoc_types::Attribute;
 use serde_json::Value;
 use std::{fs, path::Path};
@@ -77,7 +77,7 @@ impl Doc<RawJson> {
                 if let Some(attrs) = item.get_mut("attrs").and_then(|v| v.as_array_mut()) {
                     attrs.retain(|attr_val| {
                         if serde_json::from_value::<Attribute>(attr_val.clone()).is_err() {
-                            warn!("ignoring invalid attribute {}", attr_val);
+                            debug!("ignoring invalid attribute {}", attr_val);
                             false
                         } else {
                             true

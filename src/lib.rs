@@ -227,7 +227,7 @@ pub(crate) mod logging {
         INIT_LOGGER.call_once(|| {
             env_logger::builder()
                 .format_timestamp(None)
-                .filter_level(log::LevelFilter::Debug)
+                .filter_level(log::LevelFilter::Info)
                 .is_test(true)
                 .init();
         });
