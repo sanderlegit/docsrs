@@ -51,7 +51,7 @@ impl Doc<Parsed> {
             }
         }
 
-        let items = self.build_items(krate.crate_version.clone());
+        let items = self.build_items(krate.crate_version.clone(), &parent_map, &mut path_cache);
 
         <Doc<Indexed>>::new(index, items)
     }
@@ -123,7 +123,7 @@ impl Doc<Parsed> {
 
     /// Recursively finds the path of an item by traversing up the module tree.
     /// This is a fallback for items not present in the `paths` map, like re-exports.
-    fn get_item_path_recursive<'a>(
+    pub(super) fn get_item_path_recursive<'a>(
         &self,
         id: &'a Id,
         parent_map: &HashMap<&'a Id, &'a Id>,
