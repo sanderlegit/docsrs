@@ -82,8 +82,11 @@ mod tests {
         let krate = krate.parse().unwrap();
         let krate = krate.build_search_index();
 
-        let hit = krate.search("serde::Serialize", 1).unwrap();
-        let item = &hit[0];
+        let hits = krate.search("serde::Serialize", 5).unwrap();
+        for item in &hits {
+            println!("Found item: name={}, path={:?}", item.name, item.path);
+        }
+        let item = &hits[0];
         assert_eq!(item.name, "Serialize");
         assert_eq!(item.path, ["serde", "Serialize"]);
     }

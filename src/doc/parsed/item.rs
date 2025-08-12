@@ -1,5 +1,5 @@
 use super::{Doc, Parsed};
-use crate::{Error, doc::indexed::SearchKey};
+use crate::Error;
 use rustdoc_types::{Attribute, ItemKind};
 use std::collections::HashMap;
 use url::Url;
