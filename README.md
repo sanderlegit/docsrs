@@ -19,6 +19,40 @@ Whether you're building a custom documentation browser, writing a Rust LSP plugi
 
 ---
 
+## Searching
+
+The search is case-insensitive and uses fuzzy matching on the fully qualified path of an item. This means you can use partial queries to find what you're looking for.
+
+For example, to search for `Vec::push`, you could use queries like:
+- `"std::vec::Vec::push"` (exact match)
+- `"vec push"` (partial match)
+- `"std::vec::push"`
+
+### Supported Item Types
+
+The following item types are indexed and searchable. Here are examples of how you can reference them in a query:
+
+| Item Type       | Example Reference                  |
+|-----------------|------------------------------------|
+| Module          | `std::collections`                 |
+| Struct          | `std::vec::Vec`                    |
+| Enum            | `std::option::Option`              |
+| Enum Variant    | `std::option::Option::Some`        |
+| Union           | `my_crate::MyUnion`                |
+| Function        | `std::mem::swap`                   |
+| Method          | `std::vec::Vec::push`              |
+| Trait           | `std::convert::From`               |
+| Trait Item      | `std::convert::From::from`         |
+| Macro           | `std::println`                     |
+| Constant        | `std::f64::consts::PI`             |
+| Static          | `my_crate::MY_STATIC`              |
+| Type Alias      | `std::io::Result`                  |
+| Primitive       | `u8`                               |
+
+**Note:** The search is not limited to these exact formats. Thanks to fuzzy matching, you can often use shorter, more convenient queries.
+
+---
+
 ## Installation
 
 Add `docsrs` to your `Cargo.toml`:
