@@ -50,7 +50,13 @@ impl Doc<Parsed> {
                     }
                 }
             }
-            ItemKind::Enum => {}
+            ItemKind::Enum => {
+                if let Some(item) = krate.index.get(id) {
+                    if let ItemEnum::Enum(e) = &item.inner {
+                        search_keys.extend(Self::search_keys_enums(krate, e, &base_path));
+                    }
+                }
+            }
             _ => {}
         }
 
