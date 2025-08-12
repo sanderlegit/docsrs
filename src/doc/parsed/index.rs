@@ -57,6 +57,20 @@ impl Doc<Parsed> {
                     }
                 }
             }
+            ItemKind::Trait => {
+                if let Some(item) = krate.index.get(id) {
+                    if let ItemEnum::Trait(t) = &item.inner {
+                        search_keys.extend(Self::search_keys_traits(krate, t, &base_path));
+                    }
+                }
+            }
+            ItemKind::Union => {
+                if let Some(item) = krate.index.get(id) {
+                    if let ItemEnum::Union(u) = &item.inner {
+                        search_keys.extend(Self::search_keys_unions(krate, u, &base_path));
+                    }
+                }
+            }
             _ => {}
         }
 
