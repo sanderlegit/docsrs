@@ -12,8 +12,8 @@ struct Args {
     query: String,
 
     /// The version of the crate to search in
-    #[arg(short, long = "crate-version", default_value = "latest")]
-    version: String,
+    #[arg(short = 'v', long = "crate-version", default_value = "latest", value_name = "VERSION")]
+    crate_version: String,
 
     /// The number of search results to return
     #[arg(short, long, default_value_t = 10)]
@@ -23,7 +23,7 @@ struct Args {
 fn main() -> Result<(), Error> {
     let args = Args::parse();
 
-    let doc = Doc::from_docs(&args.crate_name, &args.version)?
+    let doc = Doc::from_docs(&args.crate_name, &args.crate_version)?
         .fetch()?
         .decompress()?
         .parse()?
