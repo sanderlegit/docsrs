@@ -1,6 +1,6 @@
 use super::{Doc, Parsed};
 use crate::{Error, doc::indexed::SearchKey};
-use rustdoc_types::{Attribute, ItemEnum};
+use rustdoc_types::{Attribute, ItemEnum, ItemKind};
 use std::collections::HashMap;
 use url::Url;
 
@@ -23,6 +23,8 @@ impl Doc<Parsed> {
                     .unwrap()
                     .clone();
 
+                let item_summary = self.0.ast.paths.get(&rustdoc_types::Id(key.id)).unwrap();
+
                 let links = item.links.into_iter().map(|(k, id)| (k, (id.0))).collect();
 
                 (
@@ -32,6 +34,7 @@ impl Doc<Parsed> {
                         crate_id: item.crate_id,
                         crate_version: version.clone(),
                         path,
+                        kind: item_summary.kind,
                         visibility: item.visibility,
                         span: item.span,
                         name: item.name.unwrap_or_default(),
@@ -53,7 +56,7 @@ impl Doc<Parsed> {
 /// struct, enum, module, etc.) extracted from the rustdoc AST. It provides a
 /// simplified and searchable representation of the original rustdoc data with
 /// preprocessed paths and normalized identifiers.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Item {
     /// Unique identifier for this item within the documentation
     pub id: u32,
@@ -63,6 +66,8 @@ pub struct Item {
     pub crate_version: Option<String>,
     /// Fully qualified path components (e.g., ["std", "collections", "HashMap"])
     pub path: Vec<String>,
+    /// The kind of the item
+    pub kind: ItemKind,
     /// Source code location information, if available
     pub visibility: rustdoc_types::Visibility,
     /// Name of the item (e.g., "HashMap", "push", "main")
@@ -82,13 +87,8 @@ pub struct Item {
 }
 
 impl Item {
-    /// Returns the url for the search site of the crate
-    pub fn search_url(&self) -> Result<Url, Error> {
-        let path = self.path.join("::");
-        Ok(Url::parse(&format!("https://docs.rs/{path}"))?)
-    }
-
-    pub(crate) fn _url(&self) -> Result<Option<Url>, Error> {
+    /// Returns the url for the item on docs.rs
+    pub fn url(&self) -> Result<Option<Url>, Error> {
         if self.path.is_empty() {
             return Ok(None);
         }
@@ -101,30 +101,50 @@ impl Item {
 
         let mut url = Url::parse(&format!("https://docs.rs/{crate_name}/{version}"))?;
 
-        match &self.inner {
-            ItemEnum::Function(_) => {
-                if self.path.len() >= 3 {
-                    let parent_path = &self.path[..&self.path.len() - 1];
-                    let parent_type = parent_path.last().unwrap();
-
-                    let mut path_segments = url.path_segments_mut().unwrap();
-                    for segment in parent_path {
-                        path_segments.push(segment);
-                    }
-                    path_segments.push(&format!("struct.{parent_type}.html"));
-                    drop(path_segments);
-
-                    url.set_fragment(Some(&format!("method.{}", self.name)));
-                } else {
-                    let mut path_segments = url.path_segments_mut().unwrap();
-                    for segment in &self.path {
-                        path_segments.push(segment);
-                    }
-                    path_segments.push(&format!("fn.{}.html", self.name));
-                }
+        let (path_prefix, file_name) = match self.kind {
+            ItemKind::Module => (self.path.get(1..).unwrap_or(&[]), "index.html".to_string()),
+            ItemKind::Struct | ItemKind::Union | ItemKind::Enum | ItemKind::Trait => {
+                let prefix = match self.kind {
+                    ItemKind::Struct => "struct",
+                    ItemKind::Union => "union",
+                    ItemKind::Enum => "enum",
+                    ItemKind::Trait => "trait",
+                    _ => unreachable!(),
+                };
+                (
+                    self.path.get(1..self.path.len() - 1).unwrap_or(&[]),
+                    format!("{}.{}.html", prefix, self.name),
+                )
+            }
+            ItemKind::Function
+            | ItemKind::Const
+            | ItemKind::Static
+            | ItemKind::Macro
+            | ItemKind::TypeAlias
+            | ItemKind::ForeignType => {
+                let prefix = match self.kind {
+                    ItemKind::Function => "fn",
+                    ItemKind::Const => "const",
+                    ItemKind::Static => "static",
+                    ItemKind::Macro => "macro",
+                    ItemKind::TypeAlias => "type",
+                    ItemKind::ForeignType => "foreigntype",
+                    _ => unreachable!(),
+                };
+                (
+                    self.path.get(1..self.path.len() - 1).unwrap_or(&[]),
+                    format!("{}.{}.html", prefix, self.name),
+                )
             }
             _ => return Ok(None),
+        };
+
+        let mut path_segments = url.path_segments_mut().unwrap();
+        for segment in path_prefix {
+            path_segments.push(segment);
         }
+        path_segments.push(&file_name);
+        drop(path_segments);
 
         Ok(Some(url))
     }

@@ -66,11 +66,11 @@ mod tests {
         let krate = krate.build_search_index();
         krate.save_index("index").unwrap();
 
-        let hit = krate.search("doc:from_docs", 1);
+        let hit = krate.search("tokio::spawn", 1);
         println!("{hit:#?}");
 
         if let Some(item) = hit {
-            let url = item[0]._url().unwrap().unwrap().to_string();
+            let url = item[0].url().unwrap().unwrap().to_string();
             println!("{url}")
         }
     }
