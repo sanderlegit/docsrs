@@ -80,6 +80,19 @@ mod tests {
         let krate = krate.fetch().unwrap();
         let krate = krate.decompress().unwrap();
         let krate = krate.parse().unwrap();
+
+        // Debugging re-exports
+        for (id, item) in &krate.0.ast.index {
+            if let rustdoc_types::ItemEnum::Import(import) = &item.inner {
+                if import.name == "Serialize" {
+                    println!("Found import for Serialize: id={:?}, item={:?}", id, item);
+                    if let Some(summary) = krate.0.ast.paths.get(id) {
+                        println!("  Path summary: {:?}", summary);
+                    }
+                }
+            }
+        }
+
         let krate = krate.build_search_index();
 
         let hits = krate.search("serde::Serialize", 5).unwrap();
